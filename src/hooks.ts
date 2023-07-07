@@ -43,7 +43,7 @@ export function useServerEndpoints () {
   return {
     data: [
       'https://pr194.up.web3.storage',
-      'https://staging.up.web3.storage'
+      'https://w3access-staging.protocol-labs.workers.dev'
     ]
   }
 }

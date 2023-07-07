@@ -19,6 +19,7 @@
     "@ucanto/interface": "^8.0.0",
     "@ucanto/principal": "^8.0.0",
     "@ucanto/transport": "^8.0.0",
+    "@web3-storage/access": "^14.0.0",
     "@web3-storage/did-mailto": "^2.0.0",
     "autoprefixer": "10.4.14",
     "eslint": "8.44.0",

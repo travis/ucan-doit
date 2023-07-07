@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Combobox } from '@headlessui/react'
 
-import { DID, Receipt } from '@ucanto/interface'
+import { DID, Delegation, Receipt, Result } from '@ucanto/interface'
 import { ConnectionView, connect } from '@ucanto/client'
 import { Absentee } from '@ucanto/principal'
 import * as HTTP from '@ucanto/transport/http'
@@ -11,6 +11,7 @@ import * as CAR from '@ucanto/transport/car'
 import { invoke } from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
 import { useDatabase, useServerEndpoints, useServerPrincipals, useSigners } from '@/hooks'
+import { bytesToDelegations } from '@web3-storage/access/encoding'
 import { ArrowPathIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 
 function jsonify (a: any) {
@@ -69,7 +70,39 @@ export default function Home () {
   // if selectedAgentDid is '', use the first signer we find, otherwise search for a matching DID
   const agentPrincipal = signers?.find(s => (selectedAgentDid === '') || (s.did() === selectedAgentDid))
 
-  const [receipt, setReceipt] = useState<Receipt | undefined>()
+  const [receipt, setRawReceipt] = useState<Receipt | undefined>()
+  const [result, setResult] = useState<Result | undefined>()
+  const [resultDelegations, setResultDelegations] = useState<Delegation[] | undefined>()
+
+  async function setReceipt (receipt?: Receipt) {
+    setRawReceipt(undefined)
+    setResult(undefined)
+    setResultDelegations(undefined)
+
+    setRawReceipt(receipt)
+    setResult(receipt?.out)
+
+    // TODO: this is a janky way to detect delegations in the result, figure out something better
+    console.log()
+    const delegationCidsToBytes = (receipt?.out?.ok as any)?.delegations
+    if (delegationCidsToBytes) {
+      const delegationBytes = Object.values(delegationCidsToBytes) as Uint8Array[]
+      console.log("decoding", delegationBytes.length)
+      const delegations = delegationBytes.flatMap(bytesToDelegations)
+      // TODO: this pure-ucanto delegation decoding ALMOST works
+      //   const extractedDelegations = Promise.all(delegationBytes.map((d) => extract(d)))
+      //   const delegations: Delegation<Capabilities>[] = (await extractedDelegations).reduce((m: Delegation<Capabilities>[], r) => {
+      //     console.log("extracted", r)
+      //     if (r.ok) {
+      //       m.push(r.ok)
+      //     }
+      //     return m
+      //   }, [])
+      console.log(delegations)
+
+      setResultDelegations(delegations)
+    }
+  }
 
   async function authorize () {
     if (client && agentPrincipal && serverPrincipal) {
@@ -205,6 +238,7 @@ export default function Home () {
                 </Combobox.Button>
               </div>
               <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Combobox.Option key={selectedEndpointQuery} value={selectedEndpointQuery}>{selectedEndpointQuery}</Combobox.Option>
                 {filteredEndpointUrls?.map(url => (
                   <Combobox.Option key={url} value={url}
                     className={({ active }) =>
@@ -227,12 +261,17 @@ export default function Home () {
       </div>
       {loading && <ArrowPathIcon className='animate-spin' />}
       <div className='flex flex-row w-full'>
-        <pre className='w-1/2 overflow-x-scroll'>
+        <pre className='w-1/3 overflow-x-scroll'>
           {jsonify(receipt)}
         </pre>
-        <pre className='w-1/2 overflow-x-scroll'>
-          {jsonify(receipt?.out)}
+        <pre className='w-1/3 overflow-x-scroll'>
+          {jsonify(result)}
         </pre>
+        {resultDelegations && resultDelegations.length > 0 && (
+          <pre className='w-1/3 overflow-x-scroll'>
+            { resultDelegations.map(d => jsonify(d)) }
+          </pre>
+        )}
       </div>
     </main>
   )
