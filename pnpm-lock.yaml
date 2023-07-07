@@ -14,6 +14,24 @@ dependencies:
   '@types/react-dom':
     specifier: 18.2.6
     version: 18.2.6
+  '@ucanto/client':
+    specifier: ^8.0.0
+    version: 8.0.0
+  '@ucanto/core':
+    specifier: ^8.0.0
+    version: 8.0.0
+  '@ucanto/interface':
+    specifier: ^8.0.0
+    version: 8.0.0
+  '@ucanto/principal':
+    specifier: ^8.0.0
+    version: 8.0.0
+  '@ucanto/transport':
+    specifier: ^8.0.0
+    version: 8.0.0
+  '@web3-storage/did-mailto':
+    specifier: ^2.0.0
+    version: 2.0.0
   autoprefixer:
     specifier: 10.4.14
     version: 10.4.14(postcss@8.4.25)
@@ -116,6 +134,40 @@ packages:
 
   /@humanwhocodes/object-schema@1.2.1:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
+    dev: false
+
+  /@ipld/car@5.1.1:
+    resolution: {integrity: sha512-HoFTUqUJL9cPGhC9qRmHCvamfIsj1JllQSQ/Xu9/KN/VNJp8To9Ms4qiZPEMOwcrNFclfYqrahjGYbf4KL/d9A==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    dependencies:
+      '@ipld/dag-cbor': 9.0.3
+      cborg: 1.10.2
+      multiformats: 11.0.2
+      varint: 6.0.0
+    dev: false
+
+  /@ipld/dag-cbor@9.0.3:
+    resolution: {integrity: sha512-A2UFccS0+sARK9xwXiVZIaWbLbPxLGP3UZOjBeOMWfDY04SXi8h1+t4rHBzOlKYF/yWNm3RbFLyclWO7hZcy4g==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    dependencies:
+      cborg: 2.0.2
+      multiformats: 12.0.1
+    dev: false
+
+  /@ipld/dag-json@10.1.2:
+    resolution: {integrity: sha512-z38JDQXzDW6mtU+ZfLO6/lXbJ4BEEDYY5cyW6+Nl7OpjWSV0mt57cE8LK6+krXlhxwuCnA+/sOtaXuJ3lImvfw==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    dependencies:
+      cborg: 2.0.2
+      multiformats: 12.0.1
+    dev: false
+
+  /@ipld/dag-ucan@3.3.2:
+    resolution: {integrity: sha512-EhuOrAfnudsVYIbzEIgi3itHAEo3WZNOt1VNPsYhxKBhOzDMeoTXh6/IHc7ZKBW1T2vDQHdgj4m1r64z6MssGA==}
+    dependencies:
+      '@ipld/dag-cbor': 9.0.3
+      '@ipld/dag-json': 10.1.2
+      multiformats: 11.0.2
     dev: false
 
   /@jridgewell/gen-mapping@0.3.3:
@@ -242,6 +294,10 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@noble/ed25519@1.7.3:
+    resolution: {integrity: sha512-iR8GBkDt0Q3GyaVcIu7mSsVIqnFbkbRzGLWlvhwunacoLwt4J3swfKhfaM6rN6WY+TBGoYT1GtT1mIh2/jGbRQ==}
+    dev: false
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -376,6 +432,52 @@ packages:
     dependencies:
       '@typescript-eslint/types': 5.61.0
       eslint-visitor-keys: 3.4.1
+    dev: false
+
+  /@ucanto/client@8.0.0:
+    resolution: {integrity: sha512-2nuAzdcFawPzqQZO/7MvdtOkkxdS5OLLDmKbPV8aEV7Xo7QzwvO3gfrR1sC967ggf+O758LhaMPEXczcSspHbQ==}
+    dependencies:
+      '@ucanto/core': 8.0.0
+      '@ucanto/interface': 8.0.0
+    dev: false
+
+  /@ucanto/core@8.0.0:
+    resolution: {integrity: sha512-Ne45bH0uUhAexNkJWj8tYsvKut58LaL3rsu30vxVh+ybkj47nD02mY8KqW+vCHY80E1ubPcjlHuCt0+efR9bgw==}
+    dependencies:
+      '@ipld/car': 5.1.1
+      '@ipld/dag-cbor': 9.0.3
+      '@ipld/dag-ucan': 3.3.2
+      '@ucanto/interface': 8.0.0
+      multiformats: 11.0.2
+    dev: false
+
+  /@ucanto/interface@8.0.0:
+    resolution: {integrity: sha512-xeJJYdGAPKOYbCiG8BsGmyoBovZDtVya+42Gtd8fViZeNSS3h0f2BPDBS91YFOxSGswqCd2fqvrfrlg3TTMmZw==}
+    dependencies:
+      '@ipld/dag-ucan': 3.3.2
+      multiformats: 11.0.2
+    dev: false
+
+  /@ucanto/principal@8.0.0:
+    resolution: {integrity: sha512-85IXfp8P3FGbQ5rQbLtAA2DkIgjOaqdTPXZHA2W+/UdEsJxfb1jf2TqOjHUt3PWcCbP2hqbRZWBYAKJszkW2uA==}
+    dependencies:
+      '@ipld/dag-ucan': 3.3.2
+      '@noble/ed25519': 1.7.3
+      '@ucanto/interface': 8.0.0
+      multiformats: 11.0.2
+      one-webcrypto: 1.0.3
+    dev: false
+
+  /@ucanto/transport@8.0.0:
+    resolution: {integrity: sha512-1/3ELUtUAu7zNKq/jy/PjvvCoFt7cFS8198E8U04UM1EsZS0WvK2VnEa/aS8MA5bBy8TjRFmQtXjcndZ0RE5vw==}
+    dependencies:
+      '@ucanto/core': 8.0.0
+      '@ucanto/interface': 8.0.0
+    dev: false
+
+  /@web3-storage/did-mailto@2.0.0:
+    resolution: {integrity: sha512-y0uWnAG6V0PmKCPQdiSc8eR+yOpj3kyRqlm4ByNZcYd/HUT5t9UzUFMBO7hks14JOTUbV2bphHMToBS9u+f1GQ==}
+    engines: {node: '>=16.15'}
     dev: false
 
   /acorn-jsx@5.3.2(acorn@8.10.0):
@@ -607,6 +709,16 @@ packages:
 
   /caniuse-lite@1.0.30001512:
     resolution: {integrity: sha512-2S9nK0G/mE+jasCUsMPlARhRCts1ebcp2Ji8Y8PWi4NDE1iRdLCnEPHkEfeBrGC45L4isBx5ur3IQ6yTE2mRZw==}
+    dev: false
+
+  /cborg@1.10.2:
+    resolution: {integrity: sha512-b3tFPA9pUr2zCUiCfRd2+wok2/LBSNUMKOuRRok+WlvvAgEt/PlbgPTsZUcwCOs53IJvLgTp0eotwtosE6njug==}
+    hasBin: true
+    dev: false
+
+  /cborg@2.0.2:
+    resolution: {integrity: sha512-2b+30FYdBmAukzlpzWcigJDUE9ym4Mo3ldCmShfgDkq7zOOk+NnLGl1SueAFPHXi55FlyLUuT0yEXgY/1CcymA==}
+    hasBin: true
     dev: false
 
   /chalk@4.1.2:
@@ -1790,6 +1902,16 @@ packages:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
     dev: false
 
+  /multiformats@11.0.2:
+    resolution: {integrity: sha512-b5mYMkOkARIuVZCpvijFj9a6m5wMVLC7cf/jIPd5D/ARDOfLC5+IFkbgDXQgcU2goIsTD/O9NY4DI/Mt4OGvlg==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    dev: false
+
+  /multiformats@12.0.1:
+    resolution: {integrity: sha512-s01wijBJoDUqESWSzePY0lvTw7J3PVO9x2Cc6ASI5AMZM2Gnhh7BC17+nlFhHKU7dDzaCaRfb+NiqNzOsgPUoQ==}
+    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+    dev: false
+
   /mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
     dependencies:
@@ -1946,6 +2068,10 @@ packages:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
     dependencies:
       wrappy: 1.0.2
+    dev: false
+
+  /one-webcrypto@1.0.3:
+    resolution: {integrity: sha512-fu9ywBVBPx0gS9K0etIROTiCkvI5S1TDjFsYFb3rC1ewFxeOqsbzq7aIMBHsYfrTHBcGXJaONXXjTl8B01cW1Q==}
     dev: false
 
   /onetime@5.1.2:
@@ -2596,6 +2722,10 @@ packages:
 
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+    dev: false
+
+  /varint@6.0.0:
+    resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
     dev: false
 
   /watchpack@2.4.0:
