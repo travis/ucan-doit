@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
-import { Signer } from "@ucanto/interface"
-import { DB_NAME, listSigners, openDatabase } from "./database"
+import { DID, Signer } from "@ucanto/interface"
+import { DB_NAME, listSigners, openDatabase, createSigner } from "./database"
+import useSWR from 'swr'
+import { Absentee } from "@ucanto/principal"
 
 export function useDatabase (name = DB_NAME) {
   const [db, setDB] = useState<IDBDatabase | undefined>()
@@ -14,14 +16,48 @@ export function useDatabase (name = DB_NAME) {
 }
 
 export function useSigners (db?: IDBDatabase) {
-  const [signers, setSigners] = useState<Signer[] | undefined>()
-  useEffect(function () {
-    async function load () {
+  const swrResponse = useSWR(db && '/signers', async () => db && await listSigners(db))
+  return {
+    get data () {
+      return swrResponse.data
+    },
+    get signers () {
+      return swrResponse.data as Signer[]
+    },
+    get error () {
+      return swrResponse.error
+    },
+    get isLoading () {
+      return swrResponse.isLoading
+    },
+    async create () {
       if (db) {
-        setSigners(await listSigners(db))
+        await createSigner(db)
+        swrResponse.mutate()
       }
     }
-    load()
-  }, [db])
-  return signers
+  }
+}
+
+export function useServerEndpoints () {
+  return {
+    data: [
+      'https://pr194.up.web3.storage',
+      'https://staging.up.web3.storage'
+    ]
+  }
+}
+
+export function useServerPrincipals () {
+  return {
+    data: [
+      'did:web:staging.web3.storage',
+      'did:web:web3.storage'
+    ],
+
+    dids: [
+      'did:web:staging.web3.storage' as DID,
+      'did:web:web3.storage' as DID
+    ]
+  }
 }
