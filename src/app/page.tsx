@@ -13,6 +13,7 @@ import * as DidMailto from '@web3-storage/did-mailto'
 import { useDatabase, useServerEndpoints, useServerPrincipals, useSigners } from '@/hooks'
 import { bytesToDelegations } from '@web3-storage/access/encoding'
 import { ArrowPathIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import { Tab } from '@headlessui/react'
 
 function jsonify (a: any) {
   return a ? JSON.stringify(a, null, 4) : ''
@@ -153,6 +154,7 @@ export default function Home () {
     setLoading(false)
   }
 
+  const hasDelegationsTab = resultDelegations && resultDelegations.length > 0
   return (
     <main className="flex min-h-screen flex-col items-start p-24 w-screen">
       <div className='flex flex-row space-x-1'>
@@ -160,7 +162,7 @@ export default function Home () {
           Agent:
         </h4>
         {agentPrincipal && (
-          <Combobox value={agentPrincipal.did()} onChange={setSelectedAgentDid} as='div' className='relative mt-1 w-[32rem]'>
+          <Combobox value={agentPrincipal.did()} onChange={setSelectedAgentDid} as='div' className='relative mt-1 w-[32rem] z-10'>
             <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
               <Combobox.Input
                 onChange={(event) => setSelectedAgentQuery(event.target.value)}
@@ -260,19 +262,36 @@ export default function Home () {
         <button className='rounded border border-black py-1 px-2' onClick={() => claim()}>Claim</button>
       </div>
       {loading && <ArrowPathIcon className='animate-spin' />}
-      <div className='flex flex-row w-full'>
-        <pre className='w-1/3 overflow-x-scroll'>
-          {jsonify(receipt)}
-        </pre>
-        <pre className='w-1/3 overflow-x-scroll'>
-          {jsonify(result)}
-        </pre>
-        {resultDelegations && resultDelegations.length > 0 && (
-          <pre className='w-1/3 overflow-x-scroll'>
-            { resultDelegations.map(d => jsonify(d)) }
-          </pre>
-        )}
-      </div>
-    </main>
+
+      {receipt && <Tab.Group className='mt-2' as='div'>
+        <Tab.List>
+          {hasDelegationsTab && (
+            <Tab className='p-1 border border-black'>Delegations</Tab>
+          )}
+          <Tab className='p-1 border border-black'>Result</Tab>
+          <Tab className='p-1 border border-black'>Receipt</Tab>
+        </Tab.List>
+        <Tab.Panels>
+          {hasDelegationsTab && (
+            <Tab.Panel>
+              <pre>
+                {jsonify(resultDelegations)}
+              </pre>
+            </Tab.Panel>
+          )}
+          <Tab.Panel>
+            <pre>
+              {jsonify(result)}
+            </pre>
+          </Tab.Panel>
+          <Tab.Panel>
+            <pre>
+              {jsonify(receipt)}
+            </pre>
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
+      }
+    </main >
   )
 }
