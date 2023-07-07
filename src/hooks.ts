@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { DID, Signer } from "@ucanto/interface"
 import { DB_NAME, listSigners, openDatabase, createSigner } from "./database"
 import useSWR from 'swr'
-import { Absentee } from "@ucanto/principal"
 
 export function useDatabase (name = DB_NAME) {
   const [db, setDB] = useState<IDBDatabase | undefined>()
