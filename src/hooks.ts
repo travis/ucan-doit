@@ -38,25 +38,27 @@ export function useSigners (db?: IDBDatabase) {
   }
 }
 
+const SERVER_ENDPOINTS = [
+  'https://975ewytse8.execute-api.us-west-2.amazonaws.com',
+  'https://pr194.up.web3.storage',
+  'https://w3access-staging.protocol-labs.workers.dev'
+]
+
 export function useServerEndpoints () {
   return {
-    data: [
-      'https://pr194.up.web3.storage',
-      'https://w3access-staging.protocol-labs.workers.dev'
-    ]
+    data: SERVER_ENDPOINTS
   }
 }
 
+const SERVER_DIDS = [
+  'did:web:staging.web3.storage',
+  'did:web:web3.storage'
+]
+
 export function useServerPrincipals () {
   return {
-    data: [
-      'did:web:staging.web3.storage',
-      'did:web:web3.storage'
-    ],
+    data: SERVER_DIDS,
 
-    dids: [
-      'did:web:staging.web3.storage' as DID,
-      'did:web:web3.storage' as DID
-    ]
+    dids: SERVER_DIDS as DID[]
   }
 }
