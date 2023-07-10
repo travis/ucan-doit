@@ -84,29 +84,18 @@ export default function Home () {
     setResult(receipt?.out)
 
     // TODO: this is a janky way to detect delegations in the result, figure out something better
-    console.log()
     const delegationCidsToBytes = (receipt?.out?.ok as any)?.delegations
     if (delegationCidsToBytes) {
       const delegationBytes = Object.values(delegationCidsToBytes) as Uint8Array[]
-      console.log("decoding", delegationBytes.length)
       const delegations = delegationBytes.flatMap(bytesToDelegations)
-      // TODO: this pure-ucanto delegation decoding ALMOST works
-      //   const extractedDelegations = Promise.all(delegationBytes.map((d) => extract(d)))
-      //   const delegations: Delegation<Capabilities>[] = (await extractedDelegations).reduce((m: Delegation<Capabilities>[], r) => {
-      //     console.log("extracted", r)
-      //     if (r.ok) {
-      //       m.push(r.ok)
-      //     }
-      //     return m
-      //   }, [])
-      console.log(delegations)
-
       setResultDelegations(delegations)
     }
   }
 
+  const [authorizeEmail, setAuthorizeEmail] = useState<string | undefined>()
   async function authorize () {
-    if (client && agentPrincipal && serverPrincipal) {
+    if (client && agentPrincipal && serverPrincipal && authorizeEmail) {
+      setLoading(true)
       setReceipt(undefined)
       setReceipt(
         await invoke({
@@ -116,7 +105,7 @@ export default function Home () {
             can: 'access/authorize',
             with: agentPrincipal.did(),
             nb: {
-              iss: DidMailto.fromEmail('user@example.com'),
+              iss: DidMailto.fromEmail(authorizeEmail as `{string}@{string}`),
               att: [
                 { can: 'space/*' },
                 { can: 'store/*' },
@@ -127,6 +116,8 @@ export default function Home () {
           }
         }).execute(client)
       )
+      setLoading(false)
+
     }
   }
 
@@ -256,9 +247,12 @@ export default function Home () {
           )}
         </div>
       </div>
-      <div className='flex flex-row space-x-2 mt-4'>
+      <div className='flex flex-col mt-4'>
         <button className='rounded border border-black py-1 px-2' onClick={() => createNewSigner()}>Create Signer</button>
-        <button className='rounded border border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
+        <div className='flex flex-row'>
+          <button className='rounded border border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
+          <input className='w-72 px-2 rounded border border-black' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
+        </div>
         <button className='rounded border border-black py-1 px-2' onClick={() => claim()}>Claim</button>
       </div>
       {loading && <ArrowPathIcon className='animate-spin' />}
