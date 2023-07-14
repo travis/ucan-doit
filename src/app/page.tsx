@@ -200,19 +200,10 @@ export default function Home () {
 
   const hasDelegationsTab = resultDelegations && resultDelegations.length > 0
   return (
-    <main className="flex min-h-screen flex-col items-start p-24 w-screen space-y-4">
-      <div className='flex flex-row items-center space-x-1'>
-        <button className='rounded border light:border-black py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
-        <div className='flex flex-row'>
-          <button className='rounded-l border light:border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
-          <input className='w-72 px-2 rounded-r border light:border-black dark:text-black dark:border-white' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
-        </div>
-        <button className='rounded border light:border-black py-1 px-2' onClick={() => claim()}>Claim&nbsp;Delegations</button>
-      </div>
+    <main className="flex min-h-screen flex-col items-start px-24 pb-24 pt-8 w-screen space-y-4 font-mono">
+      <h3 className='text-4xl font-bold'>UCAN DOIT!</h3>
       <div className='flex flex-row items-center space-x-2'>
-        <h4 className='w-16 text-xl'>
-          Agent:
-        </h4>
+        <h4 className='w-24 text-xl'>Actor:</h4>
         {agentPrincipal && (
           <Combobox value={agentPrincipal.did()} onChange={setSelectedAgentDid} as='div' className='relative mt-1 w-[32rem] z-10'>
             <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
@@ -243,7 +234,7 @@ export default function Home () {
         )}
       </div>
       <div className='flex flex-row items-center space-x-2'>
-        <h4 className='w-16 text-xl'>Server:</h4>
+        <h4 className='w-24 text-xl'>Server:</h4>
         <div className='flex flex-row items-center space-x-2'>
           {selectedPrincipalDid && (
             <Combobox value={selectedPrincipalDid} onChange={setSelectedPrincipalDid} as='div' className='relative mt-1 w-72'>
@@ -305,7 +296,15 @@ export default function Home () {
           )}
         </div>
       </div>
-      <div className='flex space-x-8 items-center'>
+      <div className='flex flex-row items-center space-x-1 border-t border-b border-black dark:border-white py-4 w-full'>
+        <button className='rounded border light:border-black py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
+        <div className='flex flex-row'>
+          <button className='rounded-l border light:border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
+          <input className='w-72 px-2 rounded-r border light:border-black dark:text-black dark:border-white' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
+        </div>
+        <button className='rounded border light:border-black py-1 px-2' onClick={() => claim()}>Claim&nbsp;Delegations</button>
+      </div>
+      <div className='flex space-x-8 items-center border-b border-black dark:border-white pb-4 w-full'>
         <div className='flex flex-row space-x-4'>
           <div className='flex flex-col space-y-1'>
             <h4 className='text-lg'>Invoke and Execute</h4>
