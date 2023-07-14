@@ -232,6 +232,7 @@ export default function Home () {
             </Combobox.Options>
           </Combobox>
         )}
+        <button className='rounded border light:border-black py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
       </div>
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-24 text-xl'>Server:</h4>
@@ -297,7 +298,6 @@ export default function Home () {
         </div>
       </div>
       <div className='flex flex-row items-center space-x-1 border-t border-b border-black dark:border-white py-4 w-full'>
-        <button className='rounded border light:border-black py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
         <div className='flex flex-row'>
           <button className='rounded-l border light:border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
           <input className='w-72 px-2 rounded-r border light:border-black dark:text-black dark:border-white' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
