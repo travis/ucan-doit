@@ -39,7 +39,6 @@ export function useSigners (db?: IDBDatabase) {
 }
 
 const SERVER_ENDPOINTS = [
-  'https://975ewytse8.execute-api.us-west-2.amazonaws.com',
   'https://pr194.up.web3.storage',
   'https://w3access-staging.protocol-labs.workers.dev'
 ]

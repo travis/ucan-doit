@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Combobox } from '@headlessui/react'
 
-import { DID, Delegation, Receipt, Result } from '@ucanto/interface'
+import { Ability, DID, Delegation, Receipt, Result } from '@ucanto/interface'
 import { ConnectionView, connect } from '@ucanto/client'
 import { Absentee } from '@ucanto/principal'
 import * as HTTP from '@ucanto/transport/http'
@@ -12,7 +12,7 @@ import { invoke } from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
 import { useDatabase, useServerEndpoints, useServerPrincipals, useSigners } from '@/hooks'
 import { bytesToDelegations } from '@web3-storage/access/encoding'
-import { ArrowPathIcon, CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
+import { ArrowPathIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Tab } from '@headlessui/react'
 
 function jsonify (a: any) {
@@ -117,7 +117,6 @@ export default function Home () {
         }).execute(client)
       )
       setLoading(false)
-
     }
   }
 
@@ -169,9 +168,9 @@ export default function Home () {
 
   const hasDelegationsTab = resultDelegations && resultDelegations.length > 0
   return (
-    <main className="flex min-h-screen flex-col items-start p-24 w-screen">
-      <div className='flex flex-row space-x-1'>
-        <h4>
+    <main className="flex min-h-screen flex-col items-start p-24 w-screen space-y-4">
+      <div className='flex flex-row items-center space-x-2'>
+        <h4 className='w-16 text-xl'>
           Agent:
         </h4>
         {agentPrincipal && (
@@ -180,7 +179,7 @@ export default function Home () {
               <Combobox.Input
                 onChange={(event) => setSelectedAgentQuery(event.target.value)}
                 autoComplete='off'
-                className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                className="w-full rounded border border-black py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
               />
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronUpDownIcon
@@ -196,7 +195,6 @@ export default function Home () {
                     `relative cursor-default select-none py-2 pl-4 pr-4 ${active ? 'bg-teal-600 text-white' : 'text-gray-900'
                     }`
                   }>
-                  <CheckIcon className="hidden ui-selected:block" />
                   {signer.did()}
                 </Combobox.Option>
               ))}
@@ -204,16 +202,16 @@ export default function Home () {
           </Combobox>
         )}
       </div>
-      <div>
-        <h4>Server:</h4>
-        <div className='flex flex-row'>
+      <div className='flex flex-row items-center space-x-2'>
+        <h4 className='w-16 text-xl'>Server:</h4>
+        <div className='flex flex-row items-center space-x-2'>
           {selectedPrincipalDid && (
             <Combobox value={selectedPrincipalDid} onChange={setSelectedPrincipalDid} as='div' className='relative mt-1 w-72'>
               <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
                 <Combobox.Input
                   onChange={(event) => setSelectedPrincipalQuery(event.target.value)}
                   autoComplete='off'
-                  className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                  className="w-full rounded border border-black py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
                 />
                 <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
@@ -229,21 +227,20 @@ export default function Home () {
                       `relative cursor-default select-none py-2 pl-4 pr-4 ${active ? 'bg-teal-600 text-white' : 'text-gray-900'
                       }`
                     }>
-                    <CheckIcon className="hidden ui-selected:block" />
                     {did}
                   </Combobox.Option>
                 ))}
               </Combobox.Options>
             </Combobox>
           )}
-          @
+          <span>@</span>
           {selectedEndpointUrl && (
-            <Combobox value={selectedEndpointUrl} onChange={setSelectedEndpointUrl} as='div' className='relative mt-1 w-72'>
+            <Combobox value={selectedEndpointUrl} onChange={setSelectedEndpointUrl} as='div' className='relative mt-1 w-96'>
               <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
                 <Combobox.Input
                   onChange={(event) => setSelectedEndpointQuery(event.target.value)}
                   autoComplete='off'
-                  className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                  className="w-full rounded border border-black py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
                 />
                 <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
@@ -260,7 +257,6 @@ export default function Home () {
                       `relative cursor-default select-none py-2 pl-4 pr-4 ${active ? 'bg-teal-600 text-white' : 'text-gray-900'
                       }`
                     }>
-                    <CheckIcon className="hidden ui-selected:block" />
                     {url}
                   </Combobox.Option>
                 ))}
@@ -269,23 +265,23 @@ export default function Home () {
           )}
         </div>
       </div>
-      <div className='flex flex-col mt-4'>
+      <div className='flex flex-col mt-4 space-y-1'>
         <button className='rounded border border-black py-1 px-2' onClick={() => createNewSigner()}>Create Signer</button>
         <div className='flex flex-row'>
-          <button className='rounded border border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
-          <input className='w-72 px-2 rounded border border-black' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
+          <button className='rounded-l border border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
+          <input className='w-72 px-2 rounded-r border border-black' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
         </div>
-        <button className='rounded border border-black py-1 px-2' onClick={() => claim()}>Claim</button>
+        <button className='rounded border border-black py-1 px-2' onClick={() => claim()}>Claim Delegations</button>
       </div>
       {loading && <ArrowPathIcon className='animate-spin' />}
 
       {receipt && <Tab.Group className='mt-2' as='div'>
         <Tab.List>
           {hasDelegationsTab && (
-            <Tab className='p-1 border border-black'>Delegations</Tab>
+            <Tab className='px-1 border border-black ui-selected:bg-gray-100'>Delegations</Tab>
           )}
-          <Tab className='p-1 border border-black'>Result</Tab>
-          <Tab className='p-1 border border-black'>Receipt</Tab>
+          <Tab className='px-1 border border-black ui-selected:bg-gray-100'>Result</Tab>
+          <Tab className='px-1 border border-black ui-selected:bg-gray-100'>Receipt</Tab>
         </Tab.List>
         <Tab.Panels>
           {hasDelegationsTab && (
