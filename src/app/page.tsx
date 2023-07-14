@@ -139,6 +139,28 @@ export default function Home () {
     }
   }
 
+  const [capabilityName, setCapabilityName] = useState<string>()
+  const ability = (capabilityName == '' || capabilityName?.match('.*/.*')) ? capabilityName as Ability : null
+  const [resourceName, setResourceName] = useState<string>()
+  const resourceUri = (resourceName?.match('.*:.*')) ? resourceName as `${string}:${string}` : null
+  async function execute () {
+    if (client && agentPrincipal && serverPrincipal && ability && resourceUri) {
+      setLoading(true)
+      setReceipt(undefined)
+      setReceipt(
+        await invoke({
+          issuer: agentPrincipal,
+          audience: serverPrincipal,
+          capability: {
+            can: ability,
+            with: resourceUri
+          }
+        }).execute(client)
+      )
+      setLoading(false)
+    }
+  }
+
   async function createNewSigner () {
     setLoading(true)
     await createSigner()
