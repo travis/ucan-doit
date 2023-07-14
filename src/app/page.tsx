@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Combobox } from '@headlessui/react'
 
-import { Ability, DID, Delegation, Receipt, Result } from '@ucanto/interface'
+import { Ability, DID, Delegation, InvocationOptions, Principal, Receipt, Result } from '@ucanto/interface'
 import { ConnectionView, connect } from '@ucanto/client'
 import { Absentee } from '@ucanto/principal'
 import * as HTTP from '@ucanto/transport/http'
@@ -17,6 +17,22 @@ import { Tab } from '@headlessui/react'
 
 function jsonify (a: any) {
   return a ? JSON.stringify(a, null, 4) : ''
+}
+
+function jsonOrNull (s: string) {
+  try {
+    return JSON.parse(s)
+  } catch (e) {
+    return null
+  }
+}
+
+function invocationToString (invocation: InvocationOptions) {
+  return JSON.stringify({
+    issuer: invocation.issuer?.did(),
+    audience: invocation.audience?.did(),
+    capability: invocation.capability
+  }, null, 2)
 }
 
 export default function Home () {
@@ -43,7 +59,7 @@ export default function Home () {
       setSelectedPrincipalDid(serverPrincipalDids[0])
     }
   }, [serverPrincipalDids])
-  const serverPrincipal = useMemo(() => selectedPrincipalDid && Absentee.from({ id: selectedPrincipalDid as DID }), [selectedPrincipalDid])
+  const serverPrincipal = useMemo(() => selectedPrincipalDid ? Absentee.from({ id: selectedPrincipalDid as DID }) : undefined, [selectedPrincipalDid])
 
   const [client, setClient] = useState<ConnectionView<any>>()
   useEffect(function () {
@@ -73,6 +89,7 @@ export default function Home () {
 
   const [receipt, setRawReceipt] = useState<Receipt | undefined>()
   const [result, setResult] = useState<Result | undefined>()
+  const [invocation, setInvocation] = useState<InvocationOptions | undefined>()
   const [resultDelegations, setResultDelegations] = useState<Delegation[] | undefined>()
 
   async function setReceipt (receipt?: Receipt) {
@@ -97,24 +114,26 @@ export default function Home () {
     if (client && agentPrincipal && serverPrincipal && authorizeEmail) {
       setLoading(true)
       setReceipt(undefined)
-      setReceipt(
-        await invoke({
-          issuer: agentPrincipal,
-          audience: serverPrincipal,
-          capability: {
-            can: 'access/authorize',
-            with: agentPrincipal.did(),
-            nb: {
-              iss: DidMailto.fromEmail(authorizeEmail as `{string}@{string}`),
-              att: [
-                { can: 'space/*' },
-                { can: 'store/*' },
-                { can: 'provider/add' },
-                { can: 'upload/*' },
-              ]
-            }
+      const invocation: InvocationOptions = {
+        issuer: agentPrincipal,
+        audience: serverPrincipal,
+        capability: {
+          can: 'access/authorize',
+          with: agentPrincipal.did(),
+          nb: {
+            iss: DidMailto.fromEmail(authorizeEmail as `{string}@{string}`),
+            att: [
+              { can: 'space/*' },
+              { can: 'store/*' },
+              { can: 'provider/add' },
+              { can: 'upload/*' },
+            ]
           }
-        }).execute(client)
+        }
+      }
+      setInvocation(invocation)
+      setReceipt(
+        await invoke(invocation).execute(client)
       )
       setLoading(false)
     }
@@ -124,37 +143,50 @@ export default function Home () {
     if (client && agentPrincipal && serverPrincipal) {
       setLoading(true)
       setReceipt(undefined)
+      const invocation: InvocationOptions = {
+        issuer: agentPrincipal,
+        audience: serverPrincipal,
+        capability: {
+          can: 'access/claim',
+          with: agentPrincipal.did()
+        }
+      }
+      setInvocation(invocation)
       setReceipt(
-        await invoke({
-          issuer: agentPrincipal,
-          audience: serverPrincipal,
-          capability: {
-            can: 'access/claim',
-            with: agentPrincipal.did()
-          }
-        }).execute(client)
+        await invoke(invocation).execute(client)
       )
       setLoading(false)
     }
   }
 
-  const [capabilityName, setCapabilityName] = useState<string>()
-  const ability = (capabilityName == '' || capabilityName?.match('.*/.*')) ? capabilityName as Ability : null
-  const [resourceName, setResourceName] = useState<string>()
+  const [capabilityName, setCapabilityName] = useState<string>('')
+  const ability = (capabilityName == '*' || capabilityName?.match('.*/.*')) ? capabilityName as Ability : null
+  const [resourceName, setResourceName] = useState<string>('')
   const resourceUri = (resourceName?.match('.*:.*')) ? resourceName as `${string}:${string}` : null
+  const [inputs, setInputs] = useState<string>('')
+  const inputsJSON = jsonOrNull(inputs)
+  // intentionally claiming all these are not null with !
+  // TODO: replace InvocationOptions with a similar type with nullable fields
+  const customInvocation: InvocationOptions = {
+    issuer: agentPrincipal!,
+    audience: serverPrincipal!,
+    capability: {
+      can: ability!,
+      with: resourceUri!,
+    }
+  }
+  if (inputsJSON) {
+    customInvocation.capability.nb = inputsJSON
+  }
+
+
   async function execute () {
     if (client && agentPrincipal && serverPrincipal && ability && resourceUri) {
       setLoading(true)
       setReceipt(undefined)
+      setInvocation(customInvocation)
       setReceipt(
-        await invoke({
-          issuer: agentPrincipal,
-          audience: serverPrincipal,
-          capability: {
-            can: ability,
-            with: resourceUri
-          }
-        }).execute(client)
+        await invoke(customInvocation).execute(client)
       )
       setLoading(false)
     }
@@ -169,6 +201,14 @@ export default function Home () {
   const hasDelegationsTab = resultDelegations && resultDelegations.length > 0
   return (
     <main className="flex min-h-screen flex-col items-start p-24 w-screen space-y-4">
+      <div className='flex flex-row items-center space-x-1'>
+        <button className='rounded border border-black py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
+        <div className='flex flex-row'>
+          <button className='rounded-l border border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
+          <input className='w-72 px-2 rounded-r border border-black' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
+        </div>
+        <button className='rounded border border-black py-1 px-2' onClick={() => claim()}>Claim&nbsp;Delegations</button>
+      </div>
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-16 text-xl'>
           Agent:
@@ -265,13 +305,19 @@ export default function Home () {
           )}
         </div>
       </div>
-      <div className='flex flex-col mt-4 space-y-1'>
-        <button className='rounded border border-black py-1 px-2' onClick={() => createNewSigner()}>Create Signer</button>
-        <div className='flex flex-row'>
-          <button className='rounded-l border border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
-          <input className='w-72 px-2 rounded-r border border-black' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
+      <div className='flex space-x-8 items-center'>
+        <div className='flex flex-row space-x-4'>
+          <div className='flex flex-col space-y-1'>
+            <h4 className='text-lg'>Invoke and Execute</h4>
+            <input className='rounded border border-black py-1 px-2' placeholder='Ability' type='text' value={capabilityName} onChange={(e) => setCapabilityName(e.target.value)} />
+            <input className='rounded border border-black py-1 px-2' placeholder='Resource' type='text' value={resourceName} onChange={(e) => setResourceName(e.target.value)} />
+            <textarea className='rounded border border-black py-1 px-2' placeholder='Inputs (JSON)' value={inputs} onChange={(e) => setInputs(e.target.value)}></textarea>
+            <button className='rounded border border-black' onClick={() => execute()}>Do it!</button>
+          </div>
+          {customInvocation && (
+            <pre className='rounded border border-black bg-gray-100 py-1 px-2' >{invocationToString(customInvocation)}</pre>
+          )}
         </div>
-        <button className='rounded border border-black py-1 px-2' onClick={() => claim()}>Claim Delegations</button>
       </div>
       {loading && <ArrowPathIcon className='animate-spin' />}
 
@@ -282,6 +328,9 @@ export default function Home () {
           )}
           <Tab className='px-1 border border-black ui-selected:bg-gray-100'>Result</Tab>
           <Tab className='px-1 border border-black ui-selected:bg-gray-100'>Receipt</Tab>
+          {invocation && (
+            <Tab className='px-1 border border-black ui-selected:bg-gray-100'>Invocation</Tab>
+          )}
         </Tab.List>
         <Tab.Panels>
           {hasDelegationsTab && (
@@ -301,6 +350,13 @@ export default function Home () {
               {jsonify(receipt)}
             </pre>
           </Tab.Panel>
+          {invocation && (
+            <Tab.Panel>
+              <pre>
+                {invocationToString(invocation)}
+              </pre>
+            </Tab.Panel>
+          )}
         </Tab.Panels>
       </Tab.Group>
       }
