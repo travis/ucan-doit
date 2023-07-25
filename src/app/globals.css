@@ -25,3 +25,9 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+@layer components {
+  .ipt {
+    @apply rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white;
+  }
+}

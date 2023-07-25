@@ -14,6 +14,8 @@ import { useDatabase, useDelegations, useServerEndpoints, useServerPrincipals, u
 import { bytesToDelegations } from '@web3-storage/access/encoding'
 import { ArrowPathIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Tab } from '@headlessui/react'
+import useLocalStorageState from 'use-local-storage-state'
+import { Link } from '@ucanto/core/schema'
 
 function jsonify (a: any) {
   return a ? JSON.stringify(a, null, 4) : ''
@@ -27,11 +29,25 @@ function jsonOrNull (s: string) {
   }
 }
 
+function parseCIDsInNb (nb: Record<string, unknown>) {
+  const parsedNb: Record<string, unknown> = {}
+  for (const key in nb){
+    const value = nb[key]
+    if (typeof value === 'string' && value.startsWith('bagbaiera')){
+      parsedNb[key] = Link.parse(value)
+    } else {
+      parsedNb[key] = value
+    }
+  }
+  return parsedNb
+}
+
 function invocationToString (invocation: InvocationOptions) {
   return JSON.stringify({
     issuer: invocation.issuer?.did(),
     audience: invocation.audience?.did(),
-    capability: invocation.capability
+    capability: invocation.capability,
+    proofs: invocation.proofs
   }, null, 2)
 }
 
@@ -158,13 +174,28 @@ export default function Home () {
       setLoading(false)
     }
   }
+  const { delegations: availableProofs, putDelegations, clearAll: clearAllDelegations } = useDelegations(db)
+  const [selectedProofsStore, setSelectedProofsStore] = useLocalStorageState<Record<string, boolean>>('selected-proofs', { defaultValue: {} })
+  function toggleProof (cid: string) {
+    setSelectedProofsStore(currentSelections => {
+      currentSelections[cid] = !currentSelections[cid]
+      return currentSelections
+    })
+  }
+  const selectedProofCIDs = Object.entries(selectedProofsStore).reduce<string[]>((m, [proof, include]) => {
+    if (include) {
+      m.push(proof)
+    }
+    return m
+  }, [])
+  const selectedProofs = selectedProofCIDs.map(cid => availableProofs?.find(proof => proof.asCID.toString() === cid)!)
 
   const [capabilityName, setCapabilityName] = useState<string>('')
   const ability = (capabilityName == '*' || capabilityName?.match('.*/.*')) ? capabilityName as Ability : null
   const [resourceName, setResourceName] = useState<string>('')
   const resourceUri = (resourceName?.match('.*:.*')) ? resourceName as `${string}:${string}` : null
   const [inputs, setInputs] = useState<string>('')
-  const inputsJSON = jsonOrNull(inputs)
+  const inputsJSON = parseCIDsInNb(jsonOrNull(inputs))
   // intentionally claiming all these are not null with !
   // TODO: replace InvocationOptions with a similar type with nullable fields
   const customInvocation: InvocationOptions = {
@@ -173,8 +204,10 @@ export default function Home () {
     capability: {
       can: ability!,
       with: resourceUri!,
-    }
+    },
+    proofs: selectedProofs
   }
+  
   if (inputsJSON) {
     customInvocation.capability.nb = inputsJSON
   }
@@ -198,7 +231,6 @@ export default function Home () {
     setLoading(false)
   }
 
-  const { putDelegations, clearAll: clearAllDelegations } = useDelegations(db)
   const hasSaveableDelegations = db && resultDelegations
   async function saveDelegations () {
     if (hasSaveableDelegations) {
@@ -312,19 +344,41 @@ export default function Home () {
         </div>
         <button className='rounded border border-black dark:border-white py-1 px-2' onClick={() => claim()}>Claim&nbsp;Delegations</button>
       </div>
-      <div className='flex space-x-8 items-center border-b border-black dark:border-white pb-4 w-full'>
-        <div className='flex flex-row space-x-4'>
-          <div className='flex flex-col space-y-1'>
+      <div className='flex-col items-start border-b border-black dark:border-white pb-4 w-full'>
+        <div className='flex flex-row space-x-1 mb-1 w-full'>
+          <div className='flex-grow flex flex-col space-y-1'>
             <h4 className='text-lg'>Invoke and Execute</h4>
-            <input className='rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white' placeholder='Ability' type='text' value={capabilityName} onChange={(e) => setCapabilityName(e.target.value)} />
-            <input className='rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white' placeholder='Resource' type='text' value={resourceName} onChange={(e) => setResourceName(e.target.value)} />
-            <textarea className='rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white' placeholder='Inputs (JSON)' value={inputs} onChange={(e) => setInputs(e.target.value)}></textarea>
-            <button className='rounded border border-black dark:border-white' onClick={() => execute()}>Do it!</button>
+            <input className='ipt' placeholder='Ability' type='text' value={capabilityName} onChange={(e) => setCapabilityName(e.target.value)} />
+            <input className='ipt' placeholder='Resource' type='text' value={resourceName} onChange={(e) => setResourceName(e.target.value)} />
+            <textarea className='ipt' placeholder='Inputs (JSON)' value={inputs} onChange={(e) => setInputs(e.target.value)}></textarea>
           </div>
-          {customInvocation && (
-            <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:text-black dark:border-white' >{invocationToString(customInvocation)}</pre>
-          )}
+          <div className='flex-grow flex flex-col space-y-1'>
+            <h4 className='text-lg'>With&nbsp;Proofs</h4>
+            <div className='flex flex-col space-y-2 h-full rounded border border-black dark:border-white bg-gray-100 p-2'>
+              {availableProofs?.map(delegation => (
+                <div className='flex flex-row items-center'>
+                  <input className='accent-pink-500 h-4 w-4 m-1' type='checkbox'
+                    checked={selectedProofsStore[delegation.asCID.toString()]}
+                    onChange={e => toggleProof(delegation.asCID.toString())} />
+                  <div className='flex flex-col relative'>
+                    <h4 className='w-48 overflow-hidden text-ellipsis'>{delegation.asCID.toString()}</h4>
+                    <div className='text-sm'>
+                      {delegation.capabilities.map(capability => (
+                        <span>{capability.can} </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+        <button className='rounded border border-black dark:border-white w-full' onClick={() => execute()}>Do it!</button>
+        {customInvocation && (
+          <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:text-black dark:border-white mt-2 overflow-x-scroll w-full max-h-64'>
+            {invocationToString(customInvocation)}
+            </pre>
+        )}
       </div>
       {loading && <ArrowPathIcon className='animate-spin dark:text-white w-24 h-24' />}
 

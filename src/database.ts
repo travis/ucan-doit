@@ -86,7 +86,11 @@ export async function listDelegations (db: IDBDatabase): Promise<Ucanto.Delegati
       reject(event)
     }
     request.onsuccess = event => {
-      resolve((event.target as IDBRequest).result.map((s: any) => DelegationImpl.extract(s.archive)))
+      resolve(Promise.all((event.target as IDBRequest).result.map(async (s: any) => {
+        const result = await DelegationImpl.extract(s.archive)
+        // TODO: we should handle errors here somehow
+        return result.ok
+      })))
     }
   })
 }
