@@ -119,11 +119,14 @@ export async function putDelegations (db: IDBDatabase, delegations: Ucanto.Deleg
         archive: (await delegation.archive()).ok
       }
     }))
+    // this next bit MUST not have awaits in it because the transaction will close when 
+    // control returns to the event loop
     const t = db.transaction(DELEGATION_TABLE, 'readwrite')
     const delegationsStore = t.objectStore(DELEGATION_TABLE)
     for (const storableDelegation of storableDelegations) {
       delegationsStore.put(storableDelegation)
     }
+    // end await ban since we have written to the transaction already
     t.onerror = event => {
       console.error(event)
       rejectAll(event)
