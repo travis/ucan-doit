@@ -210,7 +210,7 @@ export default function Home () {
               <Combobox.Input
                 onChange={(event) => setSelectedAgentQuery(event.target.value)}
                 autoComplete='off'
-                className="w-full rounded border light:border-black py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                className="w-full rounded border border-black dark:border-white py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
               />
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronUpDownIcon
@@ -232,7 +232,7 @@ export default function Home () {
             </Combobox.Options>
           </Combobox>
         )}
-        <button className='rounded border light:border-black py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
+        <button className='rounded border border-black dark:border-white py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
       </div>
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-24 text-xl'>Server:</h4>
@@ -243,7 +243,7 @@ export default function Home () {
                 <Combobox.Input
                   onChange={(event) => setSelectedPrincipalQuery(event.target.value)}
                   autoComplete='off'
-                  className="w-full rounded border light:border-black py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                  className="w-full rounded border border-black dark:border-white py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
                 />
                 <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
@@ -272,7 +272,7 @@ export default function Home () {
                 <Combobox.Input
                   onChange={(event) => setSelectedEndpointQuery(event.target.value)}
                   autoComplete='off'
-                  className="w-full rounded border light:border-black py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                  className="w-full rounded border border-black dark:border-white py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
                 />
                 <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
@@ -299,22 +299,22 @@ export default function Home () {
       </div>
       <div className='flex flex-row items-center space-x-1 border-t border-b border-black dark:border-white py-4 w-full'>
         <div className='flex flex-row'>
-          <button className='rounded-l border light:border-black py-1 px-2' onClick={() => authorize()}>Authorize</button>
-          <input className='w-72 px-2 rounded-r border light:border-black dark:text-black dark:border-white' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
+          <button className='rounded-l border border-black dark:border-white py-1 px-2' onClick={() => authorize()}>Authorize</button>
+          <input className='w-72 px-2 rounded-r border border-black dark:border-white dark:text-black dark:border-white' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
         </div>
-        <button className='rounded border light:border-black py-1 px-2' onClick={() => claim()}>Claim&nbsp;Delegations</button>
+        <button className='rounded border border-black dark:border-white py-1 px-2' onClick={() => claim()}>Claim&nbsp;Delegations</button>
       </div>
       <div className='flex space-x-8 items-center border-b border-black dark:border-white pb-4 w-full'>
         <div className='flex flex-row space-x-4'>
           <div className='flex flex-col space-y-1'>
             <h4 className='text-lg'>Invoke and Execute</h4>
-            <input className='rounded border light:border-black py-1 px-2 dark:text-black dark:border-white' placeholder='Ability' type='text' value={capabilityName} onChange={(e) => setCapabilityName(e.target.value)} />
-            <input className='rounded border light:border-black py-1 px-2 dark:text-black dark:border-white' placeholder='Resource' type='text' value={resourceName} onChange={(e) => setResourceName(e.target.value)} />
-            <textarea className='rounded border light:border-black py-1 px-2 dark:text-black dark:border-white' placeholder='Inputs (JSON)' value={inputs} onChange={(e) => setInputs(e.target.value)}></textarea>
-            <button className='rounded border light:border-black' onClick={() => execute()}>Do it!</button>
+            <input className='rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white' placeholder='Ability' type='text' value={capabilityName} onChange={(e) => setCapabilityName(e.target.value)} />
+            <input className='rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white' placeholder='Resource' type='text' value={resourceName} onChange={(e) => setResourceName(e.target.value)} />
+            <textarea className='rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white' placeholder='Inputs (JSON)' value={inputs} onChange={(e) => setInputs(e.target.value)}></textarea>
+            <button className='rounded border border-black dark:border-white' onClick={() => execute()}>Do it!</button>
           </div>
           {customInvocation && (
-            <pre className='rounded border light:border-black bg-gray-100 py-1 px-2 dark:text-black dark:border-white' >{invocationToString(customInvocation)}</pre>
+            <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:text-black dark:border-white' >{invocationToString(customInvocation)}</pre>
           )}
         </div>
       </div>
@@ -323,12 +323,12 @@ export default function Home () {
       {receipt && <Tab.Group className='mt-2' as='div'>
         <Tab.List>
           {hasDelegationsTab && (
-            <Tab className='px-1 border light:border-black ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Delegations</Tab>
+            <Tab className='px-1 border border-black dark:border-white ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Delegations</Tab>
           )}
-          <Tab className='px-1 border light:border-black ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Result</Tab>
-          <Tab className='px-1 border light:border-black ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Receipt</Tab>
+          <Tab className='px-1 border border-black dark:border-white ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Result</Tab>
+          <Tab className='px-1 border border-black dark:border-white ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Receipt</Tab>
           {invocation && (
-            <Tab className='px-1 border light:border-black ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Invocation</Tab>
+            <Tab className='px-1 border border-black dark:border-white ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500'>Invocation</Tab>
           )}
         </Tab.List>
         <Tab.Panels>
