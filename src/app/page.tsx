@@ -31,9 +31,9 @@ function jsonOrNull (s: string) {
 
 function parseCIDsInNb (nb: Record<string, unknown>) {
   const parsedNb: Record<string, unknown> = {}
-  for (const key in nb){
+  for (const key in nb) {
     const value = nb[key]
-    if (typeof value === 'string' && value.startsWith('bagbaiera')){
+    if (typeof value === 'string' && value.startsWith('bagbaiera')) {
       parsedNb[key] = Link.parse(value)
     } else {
       parsedNb[key] = value
@@ -58,7 +58,7 @@ export default function Home () {
   const { data: endpointUrls } = useServerEndpoints()
   const [selectedEndpointQuery, setSelectedEndpointQuery] = useState('')
   const filteredEndpointUrls = endpointUrls?.filter(u => u.startsWith(selectedEndpointQuery))
-  const [selectedEndpointUrl, setSelectedEndpointUrl] = useState<string>()
+  const [selectedEndpointUrl, setSelectedEndpointUrl] = useLocalStorageState<string>('selected-endpoint')
   useEffect(() => {
     if (!selectedEndpointUrl && endpointUrls && (endpointUrls.length > 0)) {
       setSelectedEndpointUrl(endpointUrls[0])
@@ -69,7 +69,7 @@ export default function Home () {
   const { dids: serverPrincipalDids } = useServerPrincipals()
   const [selectedPrincipalQuery, setSelectedPrincipalQuery] = useState('')
   const filteredPrincipalDids = serverPrincipalDids?.filter(d => d.startsWith(selectedPrincipalQuery))
-  const [selectedPrincipalDid, setSelectedPrincipalDid] = useState<string>()
+  const [selectedPrincipalDid, setSelectedPrincipalDid] = useLocalStorageState<string>('selected-principal')
   useEffect(() => {
     if (!selectedPrincipalDid && serverPrincipalDids && (serverPrincipalDids.length > 0)) {
       setSelectedPrincipalDid(serverPrincipalDids[0])
@@ -99,7 +99,7 @@ export default function Home () {
   const { signers, create: createSigner } = useSigners(db)
   const [selectedAgentQuery, setSelectedAgentQuery] = useState('')
   const filteredSigners = signers?.filter(s => s.did().startsWith(selectedAgentQuery))
-  const [selectedAgentDid, setSelectedAgentDid] = useState('')
+  const [selectedAgentDid, setSelectedAgentDid] = useLocalStorageState('selected-agent', { defaultValue: '' })
   // if selectedAgentDid is '', use the first signer we find, otherwise search for a matching DID
   const agentPrincipal = signers?.find(s => (selectedAgentDid === '') || (s.did() === selectedAgentDid))
 
@@ -190,11 +190,11 @@ export default function Home () {
   }, [])
   const selectedProofs = selectedProofCIDs.map(cid => availableProofs?.find(proof => proof.asCID.toString() === cid)!)
 
-  const [capabilityName, setCapabilityName] = useState<string>('')
+  const [capabilityName, setCapabilityName] = useLocalStorageState<string>('capability-name', { defaultValue: '' })
   const ability = (capabilityName == '*' || capabilityName?.match('.*/.*')) ? capabilityName as Ability : null
-  const [resourceName, setResourceName] = useState<string>('')
+  const [resourceName, setResourceName] = useLocalStorageState<string>('resource-name', { defaultValue: '' })
   const resourceUri = (resourceName?.match('.*:.*')) ? resourceName as `${string}:${string}` : null
-  const [inputs, setInputs] = useState<string>('')
+  const [inputs, setInputs] = useLocalStorageState<string>('inputs', { defaultValue: '' })
   const inputsJSON = parseCIDsInNb(jsonOrNull(inputs))
   // intentionally claiming all these are not null with !
   // TODO: replace InvocationOptions with a similar type with nullable fields
@@ -207,7 +207,7 @@ export default function Home () {
     },
     proofs: selectedProofs
   }
-  
+
   if (inputsJSON) {
     customInvocation.capability.nb = inputsJSON
   }
@@ -377,7 +377,7 @@ export default function Home () {
         {customInvocation && (
           <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:text-black dark:border-white mt-2 overflow-x-scroll w-full max-h-64'>
             {invocationToString(customInvocation)}
-            </pre>
+          </pre>
         )}
       </div>
       {loading && <ArrowPathIcon className='animate-spin dark:text-white w-24 h-24' />}
