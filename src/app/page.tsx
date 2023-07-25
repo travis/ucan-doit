@@ -3,14 +3,14 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Combobox } from '@headlessui/react'
 
-import { Ability, DID, Delegation, InvocationOptions, Principal, Receipt, Result } from '@ucanto/interface'
+import { Ability, DID, Delegation, InvocationOptions, Receipt, Result } from '@ucanto/interface'
 import { ConnectionView, connect } from '@ucanto/client'
 import { Absentee } from '@ucanto/principal'
 import * as HTTP from '@ucanto/transport/http'
 import * as CAR from '@ucanto/transport/car'
 import { invoke } from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
-import { useDatabase, useServerEndpoints, useServerPrincipals, useSigners } from '@/hooks'
+import { useDatabase, useDelegations, useServerEndpoints, useServerPrincipals, useSigners } from '@/hooks'
 import { bytesToDelegations } from '@web3-storage/access/encoding'
 import { ArrowPathIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Tab } from '@headlessui/react'
@@ -198,6 +198,14 @@ export default function Home () {
     setLoading(false)
   }
 
+  const { putDelegations, clearAll: clearAllDelegations } = useDelegations(db)
+  const hasSaveableDelegations = db && resultDelegations
+  async function saveDelegations () {
+    if (hasSaveableDelegations) {
+      putDelegations(resultDelegations)
+    }
+  }
+
   const hasDelegationsTab = resultDelegations && resultDelegations.length > 0
   return (
     <main className="flex min-h-screen flex-col items-start px-24 pb-24 pt-8 w-screen space-y-4 font-mono">
@@ -334,6 +342,14 @@ export default function Home () {
         <Tab.Panels>
           {hasDelegationsTab && (
             <Tab.Panel>
+              <div className='my-1 space-x-1'>
+                <button className='rounded border border-black dark:border-white px-1 text-sm' disabled={!hasSaveableDelegations} onClick={() => { saveDelegations() }}>
+                  Save Delegations
+                </button>
+                <button className='rounded border border-black dark:border-white px-1 text-sm' onClick={() => { clearAllDelegations() }}>
+                  Clear All Delegations
+                </button>
+              </div>
               <pre>
                 {jsonify(resultDelegations)}
               </pre>

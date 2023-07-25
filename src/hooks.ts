@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { DID, Signer } from "@ucanto/interface"
-import { DB_NAME, listSigners, openDatabase, createSigner } from "./database"
+import { DID, Signer, Delegation } from "@ucanto/interface"
+import { DB_NAME, listSigners, openDatabase, createSigner, listDelegations, clearAllDelegations, putDelegations } from "./database"
 import useSWR from 'swr'
 
 export function useDatabase (name = DB_NAME) {
@@ -38,9 +38,39 @@ export function useSigners (db?: IDBDatabase) {
   }
 }
 
+export function useDelegations (db?: IDBDatabase) {
+  const swrResponse = useSWR(db && '/delegations', async () => db && await listDelegations(db))
+  return {
+    get data () {
+      return swrResponse.data
+    },
+    get delegations () {
+      return swrResponse.data as Delegation[]
+    },
+    get error () {
+      return swrResponse.error
+    },
+    get isLoading () {
+      return swrResponse.isLoading
+    },
+    async clearAll () {
+      if (db) {
+        await clearAllDelegations(db)
+        swrResponse.mutate()
+      }
+    },
+    async putDelegations(delegations: Delegation[]) {
+      if (db) {
+        await putDelegations(db, delegations)
+        swrResponse.mutate()
+      }
+    }
+  }
+}
+
 const SERVER_ENDPOINTS = [
-  'https://pr194.up.web3.storage',
-  'https://w3access-staging.protocol-labs.workers.dev'
+  'https://staging.up.web3.storage',
+  'https://up.web3.storage'
 ]
 
 export function useServerEndpoints () {
