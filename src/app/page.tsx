@@ -355,21 +355,24 @@ export default function Home () {
           <div className='flex-grow flex flex-col space-y-1'>
             <h4 className='text-lg'>With&nbsp;Proofs</h4>
             <div className='flex flex-col space-y-2 h-full rounded border border-black dark:border-white bg-gray-100 p-2'>
-              {availableProofs?.map(delegation => (
-                <div className='flex flex-row items-center'>
-                  <input className='accent-pink-500 h-4 w-4 m-1' type='checkbox'
-                    checked={selectedProofsStore[delegation.asCID.toString()]}
-                    onChange={e => toggleProof(delegation.asCID.toString())} />
-                  <div className='flex flex-col relative'>
-                    <h4 className='w-48 overflow-hidden text-ellipsis'>{delegation.asCID.toString()}</h4>
-                    <div className='text-sm'>
-                      {delegation.capabilities.map(capability => (
-                        <span>{capability.can} </span>
-                      ))}
+              {availableProofs?.map(delegation => {
+                const cid = delegation.asCID.toString()
+                return (
+                  <div className='flex flex-row items-center' key={cid}>
+                    <input className='accent-pink-500 h-4 w-4 m-1' type='checkbox'
+                      checked={selectedProofsStore[cid]}
+                      onChange={e => toggleProof(cid)} />
+                    <div className='flex flex-col relative'>
+                      <h4 className='w-48 overflow-hidden text-ellipsis'>{cid}</h4>
+                      <div className='text-sm'>
+                        {delegation.capabilities.map((capability, i) => (
+                          <span key={i}>{capability.can} </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>
