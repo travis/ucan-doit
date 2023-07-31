@@ -272,7 +272,7 @@ export default function Home () {
             </Combobox.Options>
           </Combobox>
         )}
-        <button className='rounded border border-black dark:border-white py-1 px-2' onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
+        <button className={agentPrincipal ? 'btn' : `rounded py-1 px-2 border-2 border-pink-500 dark:border-pink-500 text-pink-500 font-bold hover:bg-gray-200`} onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
       </div>
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-24 text-xl'>Server:</h4>
@@ -339,10 +339,10 @@ export default function Home () {
       </div>
       <div className='flex flex-row items-center space-x-1 border-t border-b border-black dark:border-white py-4 w-full'>
         <div className='flex flex-row'>
-          <button className='rounded-l border border-black dark:border-white py-1 px-2' onClick={() => authorize()}>Authorize</button>
-          <input className='w-72 px-2 rounded-r border border-black dark:border-white dark:text-black dark:border-white' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
+          <button className='btn rounded-r-none' onClick={() => authorize()}>Authorize</button>
+          <input className='w-72 px-2 rounded-r border border-black dark:border-white dark:text-black dark:border-white focus:ring-0 focus:outline-none' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
         </div>
-        <button className='rounded border border-black dark:border-white py-1 px-2' onClick={() => claim()}>Claim&nbsp;Delegations</button>
+        <button className='btn' onClick={() => claim()}>Claim&nbsp;Delegations</button>
       </div>
       <div className='flex-col items-start border-b border-black dark:border-white pb-4 w-full'>
         <div className='flex flex-row space-x-1 mb-1 w-full'>
@@ -376,7 +376,7 @@ export default function Home () {
             </div>
           </div>
         </div>
-        <button className='rounded border border-black dark:border-white w-full' onClick={() => execute()}>Do it!</button>
+        <button className='btn w-full' onClick={() => execute()}>Do it!</button>
         {customInvocation && (
           <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:text-black dark:border-white mt-2 overflow-x-scroll w-full max-h-64'>
             {invocationToString(customInvocation)}
