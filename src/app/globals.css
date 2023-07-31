@@ -2,30 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
 @layer components {
   .ipt {
     @apply rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white;
@@ -33,5 +9,9 @@ body {
 
   .btn {
     @apply rounded border border-black dark:border-white py-1 px-2 hover:bg-gray-200;
+  }
+  
+  .tab {
+    @apply px-1 border border-black dark:border-white ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500 focus:outline-none focus:ring-0;
   }
 }
