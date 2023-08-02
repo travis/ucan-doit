@@ -2,13 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .btn-hover {
+    @apply hover:bg-gray-100;
+  }
+}
+
 @layer components {
   .ipt {
     @apply rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white;
   }
 
   .btn {
-    @apply rounded border border-black dark:border-white py-1 px-2 hover:bg-gray-200;
+    @apply rounded border border-black dark:border-white py-1 px-2 btn-hover;
   }
   
   .tab {

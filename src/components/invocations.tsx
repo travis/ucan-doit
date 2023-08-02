@@ -244,7 +244,7 @@ export default function Invocations () {
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-24 text-xl'>Actor:</h4>
         {actorPrincipal && (
-          <Combobox value={actorPrincipal.did()} onChange={setSelectedActorDid} as='div' className='relative mt-1 w-[32rem] z-10'>
+          <Combobox value={actorPrincipal.name} onChange={setSelectedActorDid} as='div' className='relative mt-1 w-[32rem] z-10'>
             <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
               <Combobox.Input
                 onChange={(event) => setSelectedActorQuery(event.target.value)}
@@ -260,7 +260,7 @@ export default function Invocations () {
             </div>
             <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {filteredActors?.map(actor => (
-                <Combobox.Option key={actor.did()} value={actor.name}
+                <Combobox.Option key={actor.did()} value={actor.did()}
                   className={({ active }) =>
                     `relative cursor-default select-none py-2 pl-4 pr-4 ${active ? 'bg-teal-600 text-white' : 'text-gray-900'
                     }`

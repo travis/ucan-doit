@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { DID, Delegation } from "@ucanto/interface"
-import { DB_NAME, listActors, openDatabase, createActor, listDelegations, clearAllDelegations, putDelegations, Actor } from "./database"
+import { DB_NAME, listActors, openDatabase, createActor, listDelegations, clearAllDelegations, putDelegations, Actor, setActorName } from "./database"
 import useSWR from 'swr'
 
 export function useDatabase (name = DB_NAME) {
@@ -32,6 +32,12 @@ export function useActors (db?: IDBDatabase) {
     async create () {
       if (db) {
         await createActor(db)
+        swrResponse.mutate()
+      }
+    },
+    async setName (actor: Actor, name: string) {
+      if (db) {
+        await setActorName(db, actor, name)
         swrResponse.mutate()
       }
     }

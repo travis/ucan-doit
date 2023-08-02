@@ -47,7 +47,12 @@ interface ActorRecord extends Ucanto.SignerArchive {
 }
 
 export interface Actor extends Ucanto.Signer {
-  name?: string
+  name: string
+}
+
+function signerAndNameToRecord (signer: Ucanto.Signer, name: string) {
+  const signerArchive = signer.toArchive()
+  return { ...signerArchive, name }
 }
 
 export async function createActor (db: IDBDatabase): Promise<Actor> {
@@ -56,14 +61,29 @@ export async function createActor (db: IDBDatabase): Promise<Actor> {
     const name = signer.did()
     const t = db.transaction(ACTOR_TABLE, 'readwrite')
     const actors = t.objectStore(ACTOR_TABLE)
-    const signerArchive = signer.toArchive()
-    const request = actors.add({ ...signerArchive, name })
+    const request = actors.add(signerAndNameToRecord(signer, name))
     request.onerror = event => {
       console.error(event)
       reject(event)
     }
     request.onsuccess = event => {
       resolve({ ...signer, name })
+    }
+  })
+}
+
+export async function setActorName (db: IDBDatabase, actor: Actor, newName: string) {
+  return new Promise(async (resolve, reject) => {
+
+    const t = db.transaction(ACTOR_TABLE, 'readwrite')
+    const actors = t.objectStore(ACTOR_TABLE)
+    const request = actors.put(signerAndNameToRecord(actor, newName))
+    request.onerror = event => {
+      reject(event)
+    }
+    request.onsuccess = event => {
+      actor.name = newName
+      resolve(actor)
     }
   })
 }
