@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { DID, Signer, Delegation } from "@ucanto/interface"
-import { DB_NAME, listSigners, openDatabase, createSigner, listDelegations, clearAllDelegations, putDelegations } from "./database"
+import { DID, Delegation } from "@ucanto/interface"
+import { DB_NAME, listActors, openDatabase, createActor, listDelegations, clearAllDelegations, putDelegations, Actor } from "./database"
 import useSWR from 'swr'
 
 export function useDatabase (name = DB_NAME) {
@@ -14,14 +14,14 @@ export function useDatabase (name = DB_NAME) {
   return db
 }
 
-export function useSigners (db?: IDBDatabase) {
-  const swrResponse = useSWR(db && '/signers', async () => db && await listSigners(db))
+export function useActors (db?: IDBDatabase) {
+  const swrResponse = useSWR(db && '/actors', async () => db && await listActors(db))
   return {
     get data () {
       return swrResponse.data
     },
-    get signers () {
-      return swrResponse.data as Signer[]
+    get actors () {
+      return swrResponse.data as Actor[]
     },
     get error () {
       return swrResponse.error
@@ -31,7 +31,7 @@ export function useSigners (db?: IDBDatabase) {
     },
     async create () {
       if (db) {
-        await createSigner(db)
+        await createActor(db)
         swrResponse.mutate()
       }
     }
@@ -59,7 +59,7 @@ export function useDelegations (db?: IDBDatabase) {
         swrResponse.mutate()
       }
     },
-    async putDelegations(delegations: Delegation[]) {
+    async putDelegations (delegations: Delegation[]) {
       if (db) {
         await putDelegations(db, delegations)
         swrResponse.mutate()

@@ -2,11 +2,10 @@
 
 import { Delegation as DelegationImpl } from '@ucanto/core'
 import * as Ucanto from '@ucanto/interface'
-import { Signer as SignerImpl } from '@ucanto/principal/ed25519'
-
+import { Signer as EDSigner } from '@ucanto/principal/ed25519'
 
 export const DB_NAME = 'ucan-doit'
-const SIGNER_TABLE = 'signers'
+const ACTOR_TABLE = 'actors'
 const DELEGATION_TABLE = 'delegations'
 
 export async function openDatabase (name = DB_NAME): Promise<IDBDatabase> {
@@ -17,10 +16,10 @@ export async function openDatabase (name = DB_NAME): Promise<IDBDatabase> {
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result
 
-      const signers = db.createObjectStore(SIGNER_TABLE, { keyPath: 'id' })
+      const actors = db.createObjectStore(ACTOR_TABLE, { keyPath: 'id' })
 
       // actors deserve a name
-      signers.createIndex('name', 'name', { unique: false })
+      actors.createIndex('name', 'name', { unique: false })
 
       const delegations = db.createObjectStore(DELEGATION_TABLE, { keyPath: 'cid' })
       delegations.createIndex('ability', 'ability', { multiEntry: true })
@@ -43,36 +42,48 @@ export async function openDatabase (name = DB_NAME): Promise<IDBDatabase> {
   })
 }
 
-export async function createSigner (db: IDBDatabase): Promise<Ucanto.Signer> {
+interface ActorRecord extends Ucanto.SignerArchive {
+  name: string
+}
+
+export interface Actor extends Ucanto.Signer {
+  name?: string
+}
+
+export async function createActor (db: IDBDatabase): Promise<Actor> {
   return new Promise(async (resolve, reject) => {
-    const signer = await SignerImpl.generate()
-    const t = db.transaction(SIGNER_TABLE, 'readwrite')
-    const signers = t.objectStore(SIGNER_TABLE)
+    const signer = await EDSigner.generate()
+    const name = signer.did()
+    const t = db.transaction(ACTOR_TABLE, 'readwrite')
+    const actors = t.objectStore(ACTOR_TABLE)
     const signerArchive = signer.toArchive()
-    const request = signers.add({
-      ...signerArchive,
-      name: signerArchive.id
-    })
+    const request = actors.add({ ...signerArchive, name })
     request.onerror = event => {
       console.error(event)
       reject(event)
     }
     request.onsuccess = event => {
-      resolve(signer)
+      resolve({ ...signer, name })
     }
   })
 }
 
-export async function listSigners (db: IDBDatabase): Promise<Ucanto.Signer[]> {
+function actorRecordToActor (record: ActorRecord): Actor {
+  const actor = EDSigner.from(record as Ucanto.SignerArchive<Ucanto.DID, EDSigner.SigAlg>) as unknown as Actor
+  actor.name = record.name
+  return actor
+}
+
+export async function listActors (db: IDBDatabase): Promise<Actor[]> {
   return new Promise(async (resolve, reject) => {
-    const signersStore = db.transaction(SIGNER_TABLE).objectStore(SIGNER_TABLE)
-    const request = signersStore.getAll()
+    const actorsStore = db.transaction(ACTOR_TABLE).objectStore(ACTOR_TABLE)
+    const request = actorsStore.getAll()
     request.onerror = event => {
       console.error(event)
       reject(event)
     }
     request.onsuccess = event => {
-      resolve((event.target as IDBRequest).result.map((s: any) => SignerImpl.from(s)))
+      resolve((event.target as IDBRequest).result.map((s: unknown) => actorRecordToActor(s as ActorRecord)))
     }
   })
 }

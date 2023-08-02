@@ -10,7 +10,7 @@ import * as HTTP from '@ucanto/transport/http'
 import * as CAR from '@ucanto/transport/car'
 import { invoke } from '@ucanto/core'
 import * as DidMailto from '@web3-storage/did-mailto'
-import { useDatabase, useDelegations, useServerEndpoints, useServerPrincipals, useSigners } from '@/hooks'
+import { useDatabase, useDelegations, useServerEndpoints, useServerPrincipals, useActors } from '@/hooks'
 import { bytesToDelegations } from '@web3-storage/access/encoding'
 import { ArrowPathIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Tab } from '@headlessui/react'
@@ -96,12 +96,12 @@ export default function Invocations () {
   }, [serverPrincipal, url])
   const db = useDatabase()
 
-  const { signers, create: createSigner } = useSigners(db)
-  const [selectedAgentQuery, setSelectedAgentQuery] = useState('')
-  const filteredSigners = signers?.filter(s => s.did().startsWith(selectedAgentQuery))
-  const [selectedAgentDid, setSelectedAgentDid] = useLocalStorageState('selected-agent', { defaultValue: '' })
-  // if selectedAgentDid is '', use the first signer we find, otherwise search for a matching DID
-  const agentPrincipal = signers?.find(s => (selectedAgentDid === '') || (s.did() === selectedAgentDid))
+  const { actors, create: createActor } = useActors(db)
+  const [selectedActorQuery, setSelectedActorQuery] = useState('')
+  const filteredActors = actors?.filter(s => s.did().startsWith(selectedActorQuery))
+  const [selectedActorDid, setSelectedActorDid] = useLocalStorageState('selected-actor', { defaultValue: '' })
+  // if selectedActorDid is '', use the first actor we find, otherwise search for a matching DID
+  const actorPrincipal = actors?.find(s => (selectedActorDid === '') || (s.did() === selectedActorDid))
 
   const [receipt, setRawReceipt] = useState<Receipt | undefined>()
   const [result, setResult] = useState<Result | undefined>()
@@ -127,15 +127,15 @@ export default function Invocations () {
 
   const [authorizeEmail, setAuthorizeEmail] = useState<string | undefined>()
   async function authorize () {
-    if (client && agentPrincipal && serverPrincipal && authorizeEmail) {
+    if (client && actorPrincipal && serverPrincipal && authorizeEmail) {
       setLoading(true)
       setReceipt(undefined)
       const invocation: InvocationOptions = {
-        issuer: agentPrincipal,
+        issuer: actorPrincipal,
         audience: serverPrincipal,
         capability: {
           can: 'access/authorize',
-          with: agentPrincipal.did(),
+          with: actorPrincipal.did(),
           nb: {
             iss: DidMailto.fromEmail(authorizeEmail as `{string}@{string}`),
             att: [
@@ -156,15 +156,15 @@ export default function Invocations () {
   }
 
   async function claim () {
-    if (client && agentPrincipal && serverPrincipal) {
+    if (client && actorPrincipal && serverPrincipal) {
       setLoading(true)
       setReceipt(undefined)
       const invocation: InvocationOptions = {
-        issuer: agentPrincipal,
+        issuer: actorPrincipal,
         audience: serverPrincipal,
         capability: {
           can: 'access/claim',
-          with: agentPrincipal.did()
+          with: actorPrincipal.did()
         }
       }
       setInvocation(invocation)
@@ -199,7 +199,7 @@ export default function Invocations () {
   // intentionally claiming all these are not null with !
   // TODO: replace InvocationOptions with a similar type with nullable fields
   const customInvocation: InvocationOptions = {
-    issuer: agentPrincipal!,
+    issuer: actorPrincipal!,
     audience: serverPrincipal!,
     capability: {
       can: ability!,
@@ -214,7 +214,7 @@ export default function Invocations () {
 
 
   async function execute () {
-    if (client && agentPrincipal && serverPrincipal && ability && resourceUri) {
+    if (client && actorPrincipal && serverPrincipal && ability && resourceUri) {
       setLoading(true)
       setReceipt(undefined)
       setInvocation(customInvocation)
@@ -225,9 +225,9 @@ export default function Invocations () {
     }
   }
 
-  async function createNewSigner () {
+  async function createNewActor () {
     setLoading(true)
-    await createSigner()
+    await createActor()
     setLoading(false)
   }
 
@@ -243,11 +243,11 @@ export default function Invocations () {
     <div className='flex flex-col items-start w-full'>
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-24 text-xl'>Actor:</h4>
-        {agentPrincipal && (
-          <Combobox value={agentPrincipal.did()} onChange={setSelectedAgentDid} as='div' className='relative mt-1 w-[32rem] z-10'>
+        {actorPrincipal && (
+          <Combobox value={actorPrincipal.did()} onChange={setSelectedActorDid} as='div' className='relative mt-1 w-[32rem] z-10'>
             <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
               <Combobox.Input
-                onChange={(event) => setSelectedAgentQuery(event.target.value)}
+                onChange={(event) => setSelectedActorQuery(event.target.value)}
                 autoComplete='off'
                 className="w-full rounded border border-black dark:border-white py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
               />
@@ -259,19 +259,19 @@ export default function Invocations () {
               </Combobox.Button>
             </div>
             <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {filteredSigners?.map(signer => (
-                <Combobox.Option key={signer.did()} value={signer.did()}
+              {filteredActors?.map(actor => (
+                <Combobox.Option key={actor.did()} value={actor.name}
                   className={({ active }) =>
                     `relative cursor-default select-none py-2 pl-4 pr-4 ${active ? 'bg-teal-600 text-white' : 'text-gray-900'
                     }`
                   }>
-                  {signer.did()}
+                  {actor.name}
                 </Combobox.Option>
               ))}
             </Combobox.Options>
           </Combobox>
         )}
-        <button className={agentPrincipal ? 'btn' : `rounded py-1 px-2 border-2 border-pink-500 dark:border-pink-500 text-pink-500 font-bold hover:bg-gray-200`} onClick={() => createNewSigner()}>Create&nbsp;Signer</button>
+        <button className={actorPrincipal ? 'btn' : `rounded py-1 px-2 border-2 border-pink-500 dark:border-pink-500 text-pink-500 font-bold hover:bg-gray-200`} onClick={() => createNewActor()}>Create&nbsp;Actor</button>
       </div>
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-24 text-xl'>Server:</h4>

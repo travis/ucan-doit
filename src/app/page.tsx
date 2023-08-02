@@ -3,7 +3,7 @@
 import { Tab } from '@headlessui/react'
 import Invocations from '@/components/invocations'
 import Delegations from '@/components/delegations'
-import Agents from '@/components/agents'
+import Agents from '@/components/actors'
 
 
 export default function Home () {
@@ -14,7 +14,7 @@ export default function Home () {
         <Tab.List>
           <Tab className='tab'>Invocations</Tab>
           <Tab className='tab'>Delegations</Tab>
-          <Tab className='tab'>Agents</Tab>
+          <Tab className='tab'>Actors</Tab>
         </Tab.List>
         <Tab.Panels>
           <Tab.Panel>
