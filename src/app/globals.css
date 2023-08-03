@@ -4,13 +4,17 @@
 
 @layer utilities {
   .btn-hover {
-    @apply hover:bg-gray-100;
+    @apply hover:bg-pink-100 dark:hover:bg-pink-900;
+  }
+
+  .tab-hover {
+    @apply hover:bg-pink-100 dark:hover:bg-pink-900;
   }
 }
 
 @layer components {
   .ipt {
-    @apply rounded border border-black dark:border-white py-1 px-2 dark:text-black dark:border-white;
+    @apply rounded border border-black dark:border-white py-1 px-2 dark:bg-gray-900 dark:border-white;
   }
 
   .btn {
@@ -18,6 +22,10 @@
   }
   
   .tab {
-    @apply px-1 border border-black dark:border-white ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500 focus:outline-none focus:ring-0;
+    @apply px-1 border border-black dark:border-white ui-selected:bg-gray-100 dark:ui-selected:bg-gray-500 focus:outline-none focus:ring-0 tab-hover;
   }
+}
+
+.react-datetime-picker {
+  @apply dark:text-white;
 }

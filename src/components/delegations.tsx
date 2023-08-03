@@ -20,8 +20,8 @@ function Delegation ({ delegation }: { delegation: Delegation }) {
               <h4 className='font-bold text-lg mt-2'>Audience</h4>
               <div className='overflow-x-hidden text-ellipsis'>{delegation.audience.did()}</div>
               <h4 className='font-bold text-lg mt-2'>Capabilities</h4>
-              {delegation.capabilities.map(capability => (
-                <div className='ml-4'>
+              {delegation.capabilities.map((capability, i) => (
+                <div className='ml-4' key={i}>
                   <span className='font-semibold'>{capability.can}</span>
                   &nbsp;on&nbsp;
                   <span className='font-semibold'>{capability.with}</span>
@@ -57,7 +57,7 @@ export default function Delegations () {
   const { delegations } = useDelegations(db)
 
   return (
-    <div className='flex flex-col space-y-4'>
+    <div className='flex flex-col'>
       {delegations && delegations.map((delegation, i) => (
         <Delegation
           key={i}

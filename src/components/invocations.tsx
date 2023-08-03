@@ -15,31 +15,10 @@ import { bytesToDelegations } from '@web3-storage/access/encoding'
 import { ArrowPathIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Tab } from '@headlessui/react'
 import useLocalStorageState from 'use-local-storage-state'
-import { Link } from '@ucanto/core/schema'
+import { jsonOrNull, parseCIDsInNb } from '@/app/util/ucans'
 
 function jsonify (a: any) {
   return a ? JSON.stringify(a, null, 4) : ''
-}
-
-function jsonOrNull (s: string) {
-  try {
-    return JSON.parse(s)
-  } catch (e) {
-    return null
-  }
-}
-
-function parseCIDsInNb (nb: Record<string, unknown>) {
-  const parsedNb: Record<string, unknown> = {}
-  for (const key in nb) {
-    const value = nb[key]
-    if (typeof value === 'string' && value.startsWith('bagbaiera')) {
-      parsedNb[key] = Link.parse(value)
-    } else {
-      parsedNb[key] = value
-    }
-  }
-  return parsedNb
 }
 
 function invocationToString (invocation: InvocationOptions) {
@@ -101,7 +80,7 @@ export default function Invocations () {
   const filteredActors = actors?.filter(s => s.did().startsWith(selectedActorQuery))
   const [selectedActorDid, setSelectedActorDid] = useLocalStorageState('selected-actor', { defaultValue: '' })
   // if selectedActorDid is '', use the first actor we find, otherwise search for a matching DID
-  const actorPrincipal = actors?.find(s => (selectedActorDid === '') || (s.did() === selectedActorDid))
+  const actorPrincipal = actors?.find(s => (selectedActorDid === '') || (s.did() === selectedActorDid)) || actors?.[0]
 
   const [receipt, setRawReceipt] = useState<Receipt | undefined>()
   const [result, setResult] = useState<Result | undefined>()
@@ -188,7 +167,7 @@ export default function Invocations () {
     }
     return m
   }, [])
-  const selectedProofs = selectedProofCIDs.map(cid => availableProofs?.find(proof => proof.asCID.toString() === cid)!)
+  const selectedProofs = selectedProofCIDs.map(cid => availableProofs?.find(proof => proof.asCID.toString() === cid)!).filter(x => !!x)
 
   const [capabilityName, setCapabilityName] = useLocalStorageState<string>('capability-name', { defaultValue: '' })
   const ability = (capabilityName == '*' || capabilityName?.match('.*/.*')) ? capabilityName as Ability : null
@@ -211,7 +190,6 @@ export default function Invocations () {
   if (inputsJSON) {
     customInvocation.capability.nb = inputsJSON
   }
-
 
   async function execute () {
     if (client && actorPrincipal && serverPrincipal && ability && resourceUri) {
@@ -241,9 +219,9 @@ export default function Invocations () {
   const hasDelegationsTab = resultDelegations && resultDelegations.length > 0
   return (
     <div className='flex flex-col items-start w-full'>
-      <div className='flex flex-row items-center space-x-2'>
+      <div className='flex flex-row items-center space-x-2 mt-4'>
         <h4 className='w-24 text-xl'>Actor:</h4>
-        {actorPrincipal && (
+        {actors && (actors.length > 0) && (
           <Combobox value={actorPrincipal.name} onChange={setSelectedActorDid} as='div' className='relative mt-1 w-[32rem] z-10'>
             <div className="relative w-full cursor-default overflow-hidden bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
               <Combobox.Input
@@ -271,7 +249,15 @@ export default function Invocations () {
             </Combobox.Options>
           </Combobox>
         )}
-        <button className={actorPrincipal ? 'btn' : `rounded py-1 px-2 border-2 border-pink-500 dark:border-pink-500 text-pink-500 font-bold hover:bg-gray-200`} onClick={() => createNewActor()}>Create&nbsp;Actor</button>
+        {loading ? (
+          <ArrowPathIcon className='animate-spin dark:text-white w-8 h-8' />
+        ) : (
+          <button className={actorPrincipal ? 'btn' : `rounded py-1 px-2 border-2 border-pink-500 dark:border-pink-500 text-pink-500 font-bold hover:bg-gray-200`}
+            onClick={() => createNewActor()}>
+            Create&nbsp;Actor
+          </button>
+        )}
+
       </div>
       <div className='flex flex-row items-center space-x-2'>
         <h4 className='w-24 text-xl'>Server:</h4>
@@ -336,7 +322,7 @@ export default function Invocations () {
           )}
         </div>
       </div>
-      <div className='flex flex-row items-center space-x-1 border-t border-b border-black dark:border-white py-4 w-full'>
+      <div className='flex flex-row items-center space-x-1 border-t border-b border-black dark:border-white my-4 py-4 w-full'>
         <div className='flex flex-row'>
           <button className='btn rounded-r-none' onClick={() => authorize()}>Authorize</button>
           <input className='w-72 px-2 rounded-r border border-black dark:border-white dark:text-black dark:border-white focus:ring-0 focus:outline-none' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
@@ -353,15 +339,15 @@ export default function Invocations () {
           </div>
           <div className='flex-grow flex flex-col space-y-1'>
             <h4 className='text-lg'>With&nbsp;Proofs</h4>
-            <div className='flex flex-col space-y-2 h-full rounded border border-black dark:border-white bg-gray-100 p-2'>
+            <div className='flex flex-col space-y-2 h-full rounded border border-black dark:border-white bg-gray-100 dark:bg-gray-900 p-2'>
               {availableProofs?.map(delegation => {
                 const cid = delegation.asCID.toString()
                 return (
-                  <div className='flex flex-row items-center' key={cid}>
+                  <div className='flex flex-row space-x-2 items-center' key={cid}>
                     <input className='accent-pink-500 h-4 w-4 m-1' type='checkbox'
                       checked={selectedProofsStore[cid]}
                       onChange={e => toggleProof(cid)} />
-                    <div className='flex flex-col relative'>
+                    <div className={`flex flex-col relative ${delegation.audience.did() === actorPrincipal.did() ? 'text-green-500' : ''}`}>
                       <h4 className='w-48 overflow-hidden text-ellipsis'>{cid}</h4>
                       <div className='text-sm'>
                         {delegation.capabilities.map((capability, i) => (
@@ -377,7 +363,7 @@ export default function Invocations () {
         </div>
         <button className='btn w-full' onClick={() => execute()}>Do it!</button>
         {customInvocation && (
-          <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:text-black dark:border-white mt-2 overflow-x-scroll w-full max-h-64'>
+          <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:bg-gray-900 dark:border-white mt-2 overflow-x-scroll w-full max-h-64'>
             {invocationToString(customInvocation)}
           </pre>
         )}
