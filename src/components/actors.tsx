@@ -83,7 +83,7 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
     await putDelegations([delegation])
   }
   return (
-    <div>
+    <div className='pl-1'>
       <h5 className='font-bold text-lg'>To:</h5>
       {actors && (actors.length > 0) && (
         <Combobox value={toActorPrincipal.name} onChange={setSelectedToActorDid} as='div' className='relative mt-1 w-[32rem]'>
@@ -112,9 +112,9 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
           </Combobox.Options>
         </Combobox>
       )}
-      <h5 className='font-bold text-lg'>Expiration:</h5>
+      <h5 className='font-bold text-lg mt-2'>Expiration:</h5>
       <DateTimePicker className=' text-black' onChange={setExpirationDate} value={expirationDate} />
-      <h5 className='font-bold text-lg'>Capabilities:</h5>
+      <h5 className='font-bold text-lg mt-2'>Capabilities:</h5>
       <div className='flex flex-row'>
         {capabilities.map((capability, i) => (
           <div className='relative max-w-xs border-2 border-pink-100 p-4 rounded' key={i}>
@@ -139,7 +139,7 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
           </button>
         )
       }
-      <h5 className='font-bold text-lg'>With Proofs:</h5>
+      <h5 className='font-bold text-lg mt-2'>With Proofs:</h5>
       <div className='flex flex-col space-y-2 h-full rounded border border-black dark:border-white bg-gray-100 dark:bg-gray-900 p-2'>
         {availableProofs?.map(delegation => {
           const cid = delegation.asCID.toString()
@@ -160,7 +160,7 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
           )
         })}
       </div>
-      <button className='btn' onClick={() => createAndStoreDelegation()}>
+      <button className='btn mt-2' onClick={() => createAndStoreDelegation()}>
         Delegate
       </button>
     </div >
@@ -208,8 +208,19 @@ function Actor ({ actor, setName }: { actor: Actor, setName: (actor: Actor, name
               )}
               <h4 className='font-bold text-xl mt-2'>DID</h4>
               <div>{actor?.did()}</div>
-              <h4 className='font-bold text-xl mt-2'>Delegate</h4>
-              <DelegationCreator actor={actor} />
+              <Disclosure className='mt-2' as='div'>
+                {({ open }) => (
+                  <>
+                    <Disclosure.Button className={`flex flex-row items-center w-full ${open ? 'rounded-t' : 'rounded'} bg-pink-100 px-4 py-2 text-left font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75`}>
+                      <ChevronRightIcon className={`shrink-0 mr-2 w-6 h-6 text-pink-500 ${open ? 'rotate-90 transform' : ''}`} />
+                      <h4 className='font-bold text-xl'>Delegate</h4>
+                    </Disclosure.Button>
+                    <Disclosure.Panel className='p-4 border-2 border-pink-100 rounded-b'>
+                      <DelegationCreator actor={actor} />
+                    </Disclosure.Panel>
+                  </>
+                )}
+              </Disclosure>
             </Disclosure.Panel>
           </>
         )}
