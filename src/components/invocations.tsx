@@ -323,6 +323,7 @@ export default function Invocations () {
         </div>
       </div>
       <div className='flex flex-row items-center space-x-1 border-t border-b border-black dark:border-white my-4 py-4 w-full'>
+        <h4 className='text-xl'>w3up:</h4>
         <div className='flex flex-row'>
           <button className='btn rounded-r-none' onClick={() => authorize()}>Authorize</button>
           <input className='w-72 px-2 rounded-r border border-black dark:border-white dark:text-black dark:border-white focus:ring-0 focus:outline-none' placeholder='Email' type='email' onChange={(e) => setAuthorizeEmail(e.target.value)} />
@@ -345,7 +346,7 @@ export default function Invocations () {
                 return (
                   <div className='flex flex-row space-x-2 items-center' key={cid}>
                     <input className='accent-pink-500 h-4 w-4 m-1' type='checkbox'
-                      checked={selectedProofsStore[cid]}
+                      checked={!!selectedProofsStore[cid]}
                       onChange={e => toggleProof(cid)} />
                     <div className={`flex flex-col relative ${delegation.audience.did() === actorPrincipal.did() ? 'text-green-500' : ''}`}>
                       <h4 className='w-48 overflow-hidden text-ellipsis'>{cid}</h4>
@@ -385,10 +386,10 @@ export default function Invocations () {
           {hasDelegationsTab && (
             <Tab.Panel>
               <div className='my-1 space-x-1'>
-                <button className='rounded border border-black dark:border-white px-1 text-sm' disabled={!hasSaveableDelegations} onClick={() => { saveDelegations() }}>
+                <button className='rounded border border-black dark:border-white px-1 text-sm btn-hover' disabled={!hasSaveableDelegations} onClick={() => { saveDelegations() }}>
                   Save Delegations
                 </button>
-                <button className='rounded border border-black dark:border-white px-1 text-sm' onClick={() => { clearAllDelegations() }}>
+                <button className='rounded border border-black dark:border-white px-1 text-sm btn-hover' onClick={() => { clearAllDelegations() }}>
                   Clear All Delegations
                 </button>
               </div>

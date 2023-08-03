@@ -29,3 +29,7 @@
 .react-datetime-picker {
   @apply dark:text-white;
 }
+
+.react-calendar {
+  @apply dark:text-black;
+}

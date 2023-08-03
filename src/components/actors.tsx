@@ -12,6 +12,15 @@ import 'react-datetime-picker/dist/DateTimePicker.css'
 import 'react-calendar/dist/Calendar.css'
 import 'react-clock/dist/Clock.css'
 
+function delegationToString (delegation: DelegationOptions<Capabilities>) {
+  return JSON.stringify({
+    issuer: delegation.issuer?.did(),
+    audience: delegation.audience?.did(),
+    capabilities: delegation.capabilities,
+    proofs: delegation.proofs
+  }, null, 2)
+}
+
 function CapabilityCreator ({ onAdd }: { onAdd: (capability: Capability) => void }) {
   const [capabilityName, setCapabilityName] = useState<string>('')
   const ability = (capabilityName == '*' || capabilityName?.match('.*/.*')) ? capabilityName as Ability : null
@@ -58,10 +67,7 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
   const { delegations: availableProofs, putDelegations } = useDelegations(db)
   const [selectedProofsStore, setSelectedProofsStore] = useState<Record<string, boolean>>({})
   function toggleProof (cid: string) {
-    setSelectedProofsStore(currentSelections => {
-      currentSelections[cid] = !currentSelections[cid]
-      return currentSelections
-    })
+    setSelectedProofsStore({ ...selectedProofsStore, [cid]: !selectedProofsStore[cid] })
   }
   const selectedProofCIDs = Object.entries(selectedProofsStore).reduce<string[]>((m, [proof, include]) => {
     if (include) {
@@ -69,7 +75,7 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
     }
     return m
   }, [])
-  const selectedProofs = selectedProofCIDs.map(cid => availableProofs?.find(proof => proof.asCID.toString() === cid)!)
+  const selectedProofs = selectedProofCIDs.map(cid => availableProofs?.find(proof => proof.asCID.toString() === cid)!).filter(x => !!x)
   const [expirationDate, setExpirationDate] = useState<Date | null>(new Date());
   const delegationOptions: DelegationOptions<Capabilities> = {
     issuer: actor,
@@ -144,9 +150,9 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
         {availableProofs?.map(delegation => {
           const cid = delegation.asCID.toString()
           return (
-            <div className='flex flex-row items-center' key={cid}>
+            <div className='flex flex-row space-x-2 items-center' key={cid}>
               <input className='accent-pink-500 h-4 w-4 m-1' type='checkbox'
-                checked={selectedProofsStore[cid]}
+                checked={!!selectedProofsStore[cid]}
                 onChange={e => toggleProof(cid)} />
               <div className={`flex flex-col relative ${delegation.audience.did() === actor.did() ? 'text-green-500' : ''}`}>
                 <h4 className='w-48 overflow-hidden text-ellipsis'>{cid}</h4>
@@ -160,6 +166,9 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
           )
         })}
       </div>
+      <pre className='rounded border border-black dark:border-white bg-gray-100 py-1 px-2 dark:bg-gray-900 dark:border-white mt-2 overflow-x-scroll w-full max-h-64'>
+        {delegationToString(delegationOptions)}
+      </pre>
       <button className='btn mt-2' onClick={() => createAndStoreDelegation()}>
         Delegate
       </button>
@@ -180,7 +189,7 @@ function Actor ({ actor, setName }: { actor: Actor, setName: (actor: Actor, name
       <Disclosure>
         {({ open }) => (
           <>
-            <Disclosure.Button className={`flex flex-row items-center w-full ${open ? 'rounded-t' : 'rounded'} bg-pink-100 px-4 py-2 text-left font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75`}>
+            <Disclosure.Button className={`flex flex-row items-center w-full text-xl ${open ? 'rounded-t' : 'rounded'} bg-pink-100 px-4 py-2 text-left font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75`}>
               <ChevronRightIcon className={`shrink-0 mr-2 w-6 h-6 text-pink-500 ${open ? 'rotate-90 transform' : ''}`} />
               {actor.name}
             </Disclosure.Button>
@@ -213,7 +222,7 @@ function Actor ({ actor, setName }: { actor: Actor, setName: (actor: Actor, name
                   <>
                     <Disclosure.Button className={`flex flex-row items-center w-full ${open ? 'rounded-t' : 'rounded'} bg-pink-100 px-4 py-2 text-left font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring focus-visible:ring-pink-500 focus-visible:ring-opacity-75`}>
                       <ChevronRightIcon className={`shrink-0 mr-2 w-6 h-6 text-pink-500 ${open ? 'rotate-90 transform' : ''}`} />
-                      <h4 className='font-bold text-xl'>Delegate</h4>
+                      <h4 className='font-bold text-lg'>Delegate</h4>
                     </Disclosure.Button>
                     <Disclosure.Panel className='p-4 border-2 border-pink-100 rounded-b'>
                       <DelegationCreator actor={actor} />
@@ -231,12 +240,16 @@ function Actor ({ actor, setName }: { actor: Actor, setName: (actor: Actor, name
 
 export default function Actors () {
   const db = useDatabase()
-  const { actors, setName: setActorName } = useActors(db)
+  const { actors, setName: setActorName, create: createActor } = useActors(db)
   return (
     <div>
       {actors?.map(actor => (
         <Actor actor={actor} key={actor.did()} setName={setActorName} />
       ))}
+      <button className='btn mt-2'
+        onClick={() => createActor()}>
+        Create&nbsp;Actor
+      </button>
     </div>
   )
 }
