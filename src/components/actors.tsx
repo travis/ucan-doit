@@ -188,7 +188,7 @@ function Actor ({ actor, setName }: { actor: Actor, setName: (actor: Actor, name
               <h4 className='font-bold text-xl mt-2'>Name</h4>
               {editing ? (
                 <div className='flex flex-row space-x-2 items-center'>
-                  <input type='text' placeholder='Name' value={actorName}
+                  <input className='ipt flex-grow' type='text' placeholder='Name' value={actorName}
                     onClick={e => e.stopPropagation()}
                     onChange={e => { setActorName(e.target.value) }}
                     onKeyDown={e => { if (e.key === 'Enter') saveActorName() }} />
