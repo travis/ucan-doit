@@ -117,7 +117,7 @@ function DelegationCreator ({ actor }: { actor: Actor }) {
       <h5 className='font-bold text-lg'>Capabilities:</h5>
       <div className='flex flex-row'>
         {capabilities.map((capability, i) => (
-          <div className='relative max-w-xs border-2 border-pink-100 p-4 rounded'>
+          <div className='relative max-w-xs border-2 border-pink-100 p-4 rounded' key={i}>
             <div className='flex flex-col'>
               <div>{capability.can}</div>
               <div className='text-ellipsis overflow-hidden'>{capability.with}</div>

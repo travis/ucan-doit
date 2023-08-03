@@ -42,7 +42,7 @@ export default function Invocations () {
     if (!selectedEndpointUrl && endpointUrls && (endpointUrls.length > 0)) {
       setSelectedEndpointUrl(endpointUrls[0])
     }
-  }, [endpointUrls])
+  }, [endpointUrls, selectedEndpointUrl, setSelectedEndpointUrl])
   const url = useMemo(() => selectedEndpointUrl && new URL(selectedEndpointUrl), [selectedEndpointUrl])
 
   const { dids: serverPrincipalDids } = useServerPrincipals()
@@ -53,7 +53,7 @@ export default function Invocations () {
     if (!selectedPrincipalDid && serverPrincipalDids && (serverPrincipalDids.length > 0)) {
       setSelectedPrincipalDid(serverPrincipalDids[0])
     }
-  }, [serverPrincipalDids])
+  }, [serverPrincipalDids, selectedPrincipalDid, setSelectedPrincipalDid])
   const serverPrincipal = useMemo(() => selectedPrincipalDid ? Absentee.from({ id: selectedPrincipalDid as DID }) : undefined, [selectedPrincipalDid])
 
   const [client, setClient] = useState<ConnectionView<any>>()
